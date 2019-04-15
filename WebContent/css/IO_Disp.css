@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+.parent
+{
+	position: relative;
+	width: 1024px
+	height: 768px;
+	text-align: center;
+}
+
+.inner
+{
+	width: 300px;
+	text-align: center;
+	position: absolute;
+	top: 50%;
+	left: 36%;
+	padding: 40px;
+	background-color: #99FFCC;
+	border: 1px solid #ccc;
+}
