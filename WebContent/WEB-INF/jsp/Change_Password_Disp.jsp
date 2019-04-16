@@ -1,5 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%
+	String Send_flg = "";		//← 送信区分
+
+	//↓ 送信区分取得
+	Send_flg = request.getParameter("Send_flg");
+
+	if(Send_flg != null && Send_flg.equals("Once"))
+	{
+		//↓ メインメニュー画面へ戻る
+		RequestDispatcher Once_dispatch = request.getRequestDispatcher("../jsp/Main_Menu.jsp");
+		Once_dispatch.forward(request, response);
+	}
+
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,7 +77,7 @@
 				<br>
 				<br>
 			</form>
-			<form method="post" action="../jsp/Main_Menu.jsp">
+			<form method="post">
 				<!-- 戻るボタン -->
 				<input type="hidden" name="Send_flg" value="Once" />
 				<input type="submit" name="back" value="メインメニューへ戻る" />

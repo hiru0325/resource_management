@@ -6,7 +6,8 @@
 <%
 	String Alert_flg = "";						//← アラートフラグ
 	String Auto_flg = "";						//← 自動ログインフラグ
-	HttpSession Session = null;					//← セッション情報
+	HttpSession Session = null;			//← セッション情報
+	String Send_flg = null;					//← 送信区分
 
 	//↓ セッション情報取得
 	Session = request.getSession();
@@ -17,8 +18,20 @@
 	//↓ 認証エラーフラグ取得
 	Alert_flg = (String)Session.getAttribute("Alert_flg");
 
+	//↓ 送信区分取得
+	Send_flg = request.getParameter("Send_flg");
+
 	//↓ セッション内の認証エラーフラグを消去
 	Session.removeAttribute("Alert_flg");
+
+	if(Send_flg != null && Send_flg.equals("Login"))
+	{
+		//↓ メインメニュー画面へ画面遷移し、認証処理を実行する。
+		RequestDispatcher Login_dispatch = request.getRequestDispatcher("./Main_Menu.jsp");
+		Login_dispatch.forward(request, response);
+
+		return;
+	}
 
 %>
 <!-- 以下、html/css処理 -->
@@ -128,10 +141,7 @@
 		<div class="inner">
 			<h3>ログイン画面</h3>
 			<br>
-			<!--
-			<form name="Login_Form" method="post">
-			 -->
-			 <form name="Login_Form" method="post" action="./Main_Menu.jsp">
+			 <form name="Login_Form" method="post">
 				<p>ユーザID</p>
 				<input type="text" id="user_id" name="user_id" value="" />
 				<p>パスワード</p>

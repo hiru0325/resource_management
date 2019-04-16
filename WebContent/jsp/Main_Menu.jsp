@@ -61,8 +61,7 @@
 
 				//↓ 認証失敗エラーフラグをFailedにし、ログイン画面へリダイレクト
 				Session.setAttribute("Alert_flg", "Failed");
-				RequestDispatcher Redirect_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
-				Redirect_Dispatch.forward(request, response);
+				response.sendRedirect("Main_Menu.jsp");
 
 				return;
 			}
@@ -85,8 +84,7 @@
 
 					//↓ 認証失敗ではない為、エラーフラグはfalse
 					Session.setAttribute("Alert_flg", "false");
-					RequestDispatcher Redirect_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
-					Redirect_Dispatch.forward(request, response);
+					response.sendRedirect("Main_Menu.jsp");
 
 					return;
 				}
