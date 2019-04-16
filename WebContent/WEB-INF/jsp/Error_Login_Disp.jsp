@@ -5,13 +5,16 @@
 	String Error_Title = "";	//← エラーメッセージ(見出し)
 	String Error_Content_1 = "";	//← エラーメッセージ(内容1)
 	String Error_Content_2 = "";	//← エラーメッセージ(内容2)
-	HttpSession Session;		//← セッション
+	HttpSession Session;		//← セッション情報
 
 	//↓ 現セッション取得
 	Session = request.getSession();
 
 	//↓ エラーコード取得
-	Error_Code = (int)Session.getAttribute("Error_Code");
+	if(Session.getAttribute("Error_Code") != null)
+		Error_Code = (int)Session.getAttribute("Error_Code");
+	else
+		Error_Code = 99;
 
 	//↓ セッション破棄(セッションハイジャック対策)
 	Session.invalidate();
@@ -57,6 +60,12 @@
 					Error_Title = "ログアウト処理時の想定外エラー";
 					Error_Content_1 = "ログアウト処理中に想定外エラーが発生しました。";
 					Error_Content_2 = "システム管理者へお問い合わせ下さい。";
+					break;
+		case 7:
+					//↓ 7:ログイン情報取得エラー
+					Error_Title = "ログイン情報取得エラー";
+					Error_Content_1 = "ログイン情報取得に失敗しました。";
+					Error_Content_2 = "再度、ログインしてください。";
 					break;
 		default:
 					//↓ その他エラー

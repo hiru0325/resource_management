@@ -4,21 +4,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" type="text/css" href="Menu.css" />
+<link rel="stylesheet" type="text/css" href="../css/Menu.css" />
 <title>パスワード変更画面</title>
 </head>
 <body>
 	<!-- ↓ javascript 処理-->
 	<script type="text/javascript">
-
-		//↓ 履歴保持の無効化
-		history.pushState(null, null, null);
-		//↓ ウィンドウの戻るボタン無効化
-		window.addEventListener('popstate', function()
-		{
-			alert("本ページの戻るボタンは禁止です。");
-			history.pushState(null, null, null);
-		}, false);
 
 		//↓ 入力項目チェック処理
 		function Check_Password()
@@ -57,11 +48,16 @@
 				<br>
 				<br>
 				<!-- パスワード変更ボタン -->
+				<!--
 				<input type="button" name="update" value="パスワード変更" onclick="Check_Password()" />
+				 -->
 				<br>
 				<br>
+			</form>
+			<form method="post" action="../jsp/Main_Menu.jsp">
 				<!-- 戻るボタン -->
-				<input type="button" name="back" value="メインメニューへ戻る" onclick="history.back();" />
+				<input type="hidden" name="Send_flg" value="Once" />
+				<input type="submit" name="back" value="メインメニューへ戻る" />
 			</form>
 		</div>
 	</div>

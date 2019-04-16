@@ -25,9 +25,6 @@ public class Login_Servlet
 		String Auto_flg = "";				//← 自動ログインフラグ
 		Auth_Info Auth_Info;				//← 認証情報
 
-		//↓ セッション情報取得
-		Session = request.getSession();
-
 		//↓　自動ログインフラグ取得
 		Auto_flg = (String)Session.getAttribute("Auto_flg");
 
@@ -344,6 +341,7 @@ public class Login_Servlet
 
 					}
 				}
+
 				//↓ ユーザ名取得
 				Auth_Info.setLogin_User(Login_User);
 

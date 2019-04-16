@@ -7,7 +7,6 @@
 	String Alert_flg = "";						//← アラートフラグ
 	String Auto_flg = "";						//← 自動ログインフラグ
 	HttpSession Session = null;					//← セッション情報
-	String Login_flg = "";						//← ログイン要求
 
 	//↓ セッション情報取得
 	Session = request.getSession();
@@ -52,7 +51,6 @@
 
 			if("<%= Auto_flg %>" == "true")
 			{
-				console.log("自動ログイン");
 				//↓ 一瞬だけログイン画面が表示されて邪魔なので画面そのものを非表示。
 				document.getElementById("disp").style.display="none";
 				var Login_flg = document.createElement('input');

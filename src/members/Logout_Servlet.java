@@ -147,6 +147,6 @@ public class Logout_Servlet extends HttpServlet {
 		Session.setAttribute("Alert_flg", "Logout");
 
 		//↓ ログイン画面へリダイレクト
-		response.sendRedirect("../jsp/Login_Disp.jsp");
+		response.sendRedirect("Main_Menu.jsp");
 	}
 }

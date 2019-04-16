@@ -1,3 +1,4 @@
+<%@page import="members.Return_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="members.Login_Servlet" %>
@@ -17,8 +18,10 @@
 	if(Send_flg == null)
 	{
 		//↓ メインメニュー画面へ直接アクセスした場合はログイン画面へリダイレクト
-		Session.setAttribute("Alert_flg", "false");
-		response.sendRedirect("./Login_Disp.jsp");
+		if(Session.getAttribute("Alert_flg") == null)
+			Session.setAttribute("Alert_flg", "false");
+		RequestDispatcher Login_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
+		Login_Dispatch.forward(request, response);
 	}
 
 	//↓ ログイン処理
@@ -35,12 +38,12 @@
 
 		if(Auth_Info.getResult_Content().equals("true"))
 		{
-			// 手動ログイン認証成功
+			// ログイン認証成功
 
 			//↓ ログ表示
-			log("「" + Session.getId() + "」が手動ログイン処理で正常終了しました。");
+			log("「" + Session.getId() + "」がログイン処理で正常終了しました。");
 
-			//↓ ユーザ名取得
+			//ユーザ名取得
 			Login_User = Auth_Info.getLogin_User();
 		}
 		else
@@ -58,7 +61,8 @@
 
 				//↓ 認証失敗エラーフラグをFailedにし、ログイン画面へリダイレクト
 				Session.setAttribute("Alert_flg", "Failed");
-				response.sendRedirect("./Login_Disp.jsp");
+				RequestDispatcher Redirect_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
+				Redirect_Dispatch.forward(request, response);
 
 				return;
 			}
@@ -81,13 +85,13 @@
 
 					//↓ 認証失敗ではない為、エラーフラグはfalse
 					Session.setAttribute("Alert_flg", "false");
-					response.sendRedirect("./Login_Disp.jsp");
+					RequestDispatcher Redirect_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
+					Redirect_Dispatch.forward(request, response);
 
 					return;
 				}
 				else
 				{
-					//if(Auth_Result.equals("error"))
 					if(Auth_Info.getResult_Content().equals("error"))
 					{
 						// 処理異常終了
@@ -108,18 +112,45 @@
 		}
 	}
 
+	//↓ 戻りページ処理
+	if(Send_flg != null && Send_flg.equals("Once"))
+	{
+		Auth_Info Auth_Info = null;											//← 認証結果情報
+		//↓ Return_Servlet インスタンス化
+		Return_Servlet Return_Servlet = new Return_Servlet();
+
+		//↓ ログイン情報取得処理
+		Auth_Info = Return_Servlet.Select_Info(request, response, session);
+
+		if(Auth_Info.getResult_Content().equals("true"))
+		{
+			//↓ ユーザ名取得
+			Login_User = Auth_Info.getLogin_User();
+		}
+		else
+		{
+			//↓ セッションへエラーコード設定
+			Session.setAttribute("Error_Code", Auth_Info.getError_Code());
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+	}
+
 	//↓パスワード変更処理
 	if(Send_flg != null && Send_flg.equals("Change_Password"))
 	{
-		RequestDispatcher dispatch = request.getRequestDispatcher("../WEB-INF/jsp/Change_Password_Disp.jsp");
-		dispatch.forward(request, response);
+		RequestDispatcher Change_Passeword_dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
+		Change_Passeword_dispatch.forward(request, response);
 	}
 
 	//↓ログアウト処理
 	if(Send_flg != null && Send_flg.equals("Logout"))
 	{
-		RequestDispatcher dispatch = request.getRequestDispatcher("../LogoutServlet");
-		dispatch.forward(request, response);
+		RequestDispatcher Logout_dispatch = request.getRequestDispatcher("/LogoutServlet");
+		Logout_dispatch.forward(request, response);
 	}
 
 %>
@@ -135,6 +166,15 @@
 	<script type="text/javascript">
 
 	var Send_flg;	//← リクエスト要求フラグ
+
+	//↓ 履歴保持の無効化
+	history.pushState(null, null, null);
+	//↓ ウィンドウの戻るボタン無効化
+	window.addEventListener('popstate', function()
+	{
+		alert("本ページの戻るボタンは禁止です。");
+		history.pushState(null, null, null);
+	}, false);
 
 	//↓ 履歴保持の無効化
 	history.pushState(null, null, null);
