@@ -2,6 +2,7 @@ package members;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
@@ -19,13 +20,13 @@ import util.Database_Util;
  * Servlet implementation class Logout
  */
 @WebServlet("/LogoutServlet")
-public class Logout extends HttpServlet {
+public class Logout_Servlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Logout() {
+    public Logout_Servlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -37,10 +38,10 @@ public class Logout extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		String Auto_flg = "";				//← 自動ログインフラグ
-		String User_Token = "";			//← ログイントークン
 		Connection connection = null;		//← DB接続情報
+		ResultSet rset = null;
 		int sResult = 0;					//← SQL実行結果
-		HttpSession Session = null;		//← セッション情報
+		HttpSession Session = null;			//← セッション情報
 
 		//↓ セッション取得
 		Session = request.getSession();
@@ -56,9 +57,6 @@ public class Logout extends HttpServlet {
 			{
 				if(Token_Cookie.getName().equals("User_Token"))
 				{
-					//↓ クライアント側のログイントークン取得
-					User_Token = Token_Cookie.getValue();
-
 					//↓ 自動ログインがオンの場合、意図的にログイントークンを削除
 					if(Auto_flg != null && Auto_flg.equals("true"))
 					{
@@ -79,44 +77,54 @@ public class Logout extends HttpServlet {
 		//↓ DB接続
 		connection = Database_Util.DB_Connection();
 
-		//↓ ログイントークン削除処理
-		sResult = Database_Util.Delete_Session(connection, Session.getId());
+		//↓ セッションID検索処理
+		rset = Database_Util.Search_Session(connection, Session.getId());
 
 		try
 		{
-			//↓ SQL実行結果確認
-			if(sResult == 1)
+			rset.last();
+			if(rset.getRow() >= 1)
 			{
-				//SQL実行正常終了
+				// 既存のセッションが登録されている場合、ログイン情報を削除
 
-				//↓ DB結果反映
-				connection.commit();
+				//↓ セッションID削除処理
+				sResult = Database_Util.Delete_Session(connection, Session.getId());
+
+				//↓ SQL実行結果確認
+				if(sResult == 1)
+				{
+					//SQL実行正常終了
+
+					//↓ DB結果反映
+					connection.commit();
+				}
+				else
+				{
+					//SQL実行異常終了
+
+					//DB結果ロールバック
+					connection.rollback();
+
+					//↓ ログ表示
+					log("「" + Session.getId() + "」によるログアウト処理時、ログイン情報DB削除処理が異常終了しました。SQL実行結果【sResult=" + sResult + "】");
+
+					//↓ エラーコード設定(5:ログアウト処理時のログイントークン削除DBエラー)
+					request.setAttribute("Error_Code", 5);
+
+					//↓ 異常終了画面遷移
+					RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+					dispatch.forward(request, response);
+				}
 			}
-			else
-			{
-				//SQL実行異常終了
 
-				//DB結果ロールバック
-				connection.rollback();
-
-				//↓ ログ表示
-				log("ログイントークン「" + User_Token + "」によるログアウト処理時、ログイン情報DB削除処理が異常終了しました。SQL実行結果【sResult=" + sResult + "】");
-
-				//↓ エラーコード設定(5:ログアウト処理時のログイントークン削除DBエラー)
-				request.setAttribute("Error_Code", 5);
-
-				//↓ 異常終了画面遷移
-				RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-				dispatch.forward(request, response);
-			}
 			//↓ DB切断
 			connection.close();
 		}
 		catch(SQLException e)
 		{
 			//↓ ログ表示
-			log("ログイントークン「" + User_Token + "」によるログアウト処理時にてSQL実行エラーが発生しました。");
-			log("「" + User_Token + "」:" + e.getStackTrace());
+			log("「" + Session.getId() + "」によるログアウト処理時にてSQL実行エラーが発生しました。");
+			log("「" + Session.getId() + "」:" + e.getStackTrace());
 
 			//↓ エラーコード設定(6:ログアウト処理想定外エラー)
 			request.setAttribute("Error_Code", 6);
@@ -126,14 +134,14 @@ public class Logout extends HttpServlet {
 			dispatch.forward(request, response);
 		}
 
+		//↓ ログ表示
+		log("「" + Session.getId() + "」によるログアウト処理が正常終了しました。");
+
 		//↓ セッション破棄(セッションハイジャック対策)
 		Session.invalidate();
 
 		//↓ 新規セッションを開始
 		Session = request.getSession();
-
-		//↓ ログ表示
-		log("ログイントークン「" + User_Token + "」によるログアウト処理が正常終了しました。");
 
 		//アラートフラグ
 		Session.setAttribute("Alert_flg", "Logout");

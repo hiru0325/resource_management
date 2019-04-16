@@ -28,12 +28,17 @@
 		//↓インスタンス化
 		Login_Servlet Login_Servlet = new Login_Servlet();
 
+		//↓ ログ表示
+		log("「" + Session.getId() + "」がログイン処理を開始しました。");
 		//↓ ログイン認証処理
 		Auth_Info = Login_Servlet.Authentication(request, response, Session);
 
 		if(Auth_Info.getResult_Content().equals("true"))
 		{
 			// 手動ログイン認証成功
+
+			//↓ ログ表示
+			log("「" + Session.getId() + "」が手動ログイン処理で正常終了しました。");
 
 			//↓ ユーザ名取得
 			Login_User = Auth_Info.getLogin_User();
@@ -43,6 +48,8 @@
 			if(Auth_Info.getResult_Content().equals("false"))
 			{
 				// 手動ログイン認証失敗
+
+				log("「" + Session.getId() + "」が手動ログイン処理で認証失敗しました。");
 
 				//↓ セッション破棄(セッションハイジャック対策)
 				Session.invalidate();
@@ -60,6 +67,9 @@
 				if(Auth_Info.getResult_Content().equals("redirect"))
 				{
 					// 自動ログイン認証失敗
+
+					//↓ ログ表示
+					log("「" + Session.getId() + "」が自動ログイン処理で認証失敗しました。");
 
 					//↓ 自動ログインをオフにする(一応、変えておく。。。)
 					Session.setAttribute("Auto_flg", "false");
@@ -81,6 +91,9 @@
 					if(Auth_Info.getResult_Content().equals("error"))
 					{
 						// 処理異常終了
+
+						//↓ ログ表示
+						log("「" + Session.getId() + "」がログイン処理にて異常終了しました。");
 
 						//↓ セッションへエラーコード設定
 						Session.setAttribute("Error_Code", Auth_Info.getError_Code());

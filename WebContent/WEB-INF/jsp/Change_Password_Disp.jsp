@@ -10,15 +10,16 @@
 <body>
 	<!-- ↓ javascript 処理-->
 	<script type="text/javascript">
-		var Alert_Message;
-		//↓ ページ読み込み後、実行
-		window.onload = function()
+
+		//↓ 履歴保持の無効化
+		history.pushState(null, null, null);
+		//↓ ウィンドウの戻るボタン無効化
+		window.addEventListener('popstate', function()
 		{
-			//↓ 警告メッセージ項目制御
-			Alert_Message = document.getElementById("Alert_Message");
-			//↓ 警告メッセージ項目非表示
-			Alert_Message.style.visibility = "hidden";
-		};
+			alert("本ページの戻るボタンは禁止です。");
+			history.pushState(null, null, null);
+		}, false);
+
 		//↓ 入力項目チェック処理
 		function Check_Password()
 		{
@@ -26,7 +27,6 @@
 			var After_pw = document.getElementById("After_pw");
 			//↓ 確認パスワード項目制御
 			var Confirm_pw = document.getElementById("Confirm_pw");
-
 
 			//↓ 新パスワードと確認パスワードの比較
 			if(After_pw.value == Confirm_pw.value)
@@ -36,9 +36,8 @@
 			}
 			else
 			{
-				//↓ 比較結果メッセージ表示
-				Alert_Message.innerHTML = "「新しいパスワード」と「新しいパスワード(確認)」の内容が不一致です。";
-				Alert_Message.style.visibility = "visible";
+				//↓ アラートメッセージ表示
+				alert("「新しいパスワード」と「新しいパスワード(確認)」の内容が不一致です。");
 			}
 		}
 	</script>
@@ -48,16 +47,13 @@
 		<div class="inner">
 			<h3>パスワード変更画面</h3>
 			<p>下記、項目を入力してください。</p>
-			<form name="Change_Password_Form" method="post" action="">
+			<form name="Change_Password_Form" method="post">
 				<p>現在のパスワード</p>
 				<input type="password" id="Before_pw" name="Before_pw" />
 				<p>新しいパスワード</p>
 				<input type="password" id="After_pw" name="After_pw" />
 				<p>新しいパスワード(確認)</p>
 				<input type="password" id="Confirm_pw" name="Confirm_pw" />
-				<br>
-				<br>
-				<p id="Alert_Message">アラートメッセージ</p>
 				<br>
 				<br>
 				<!-- パスワード変更ボタン -->
