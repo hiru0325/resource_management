@@ -104,45 +104,17 @@ public class Login_Servlet
 					int sResult = 0;					//← SQL登録実行結果
 					ResultSet Session_Result = null;	//← SQL抽出実行結果
 
+					//↓ セッションID検索処理
 					Session_Result = Database_Util.Search_Session(connection, Session.getId());
 
 					Session_Result.last();
-					if(Session_Result.getRow() == 1)
+					if(Session_Result.getRow() >= 1)
 					{
-						// 既存のセッションが登録されている場合
+						// 既存のセッションが登録されている場合、ログイン情報を削除(戻しボタン対策)
 
-						//↓ カーソルを先頭行へ移動
-						Session_Result.first();
-
-						//↓ ユーザ名取得
-						login_user = Session_Result.getString("USER_NAME");
-						Auth_Info.setLogin_User(login_user);
-
-						//↓ DB切断
-						connection.close();
-
-						//↓ 認証成功
-						Auth_Info.setResult_Content("true");
-						return Auth_Info;
+						//↓ セッションID削除処理
+						sResult = Database_Util.Delete_Session(connection, Session.getId());
 					}
-					else
-					{
-						if(Session_Result.getRow() != 0)
-						{
-							// セッションIDが複数登録されている場合
-
-							//↓ 2:手動ログイン処理時の想定外エラー
-							Auth_Info.setError_Code(2);
-
-							//↓ DB切断
-							connection.close();
-
-							//↓ 処理異常終了
-							Auth_Info.setResult_Content("error");
-							return Auth_Info;
-						}
-					}
-
 
 					//↓ 自動ログインチェックフラグがtrueの場合、セッションに自動ログインフラグを保持
 					if(Auto_Login_Check != null && Auto_Login_Check.equals("true"))
