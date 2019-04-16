@@ -11,6 +11,15 @@
 	<!-- ↓ javascript 処理-->
 	<script type="text/javascript">
 
+		//↓ 履歴保持の無効化
+		history.pushState(null, null, null);
+		//↓ ウィンドウの戻るボタン無効化
+		window.addEventListener('popstate', function()
+		{
+			alert("本ページの戻るボタンは禁止です。");
+			history.pushState(null, null, null);
+		}, false);
+
 		//↓ 入力項目チェック処理
 		function Check_Password()
 		{
