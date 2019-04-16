@@ -1,7 +1,5 @@
 package members;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,11 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -22,31 +16,14 @@ import info.Auth_Info;
 import util.Cipher_Util;
 import util.Database_Util;
 
-/**
- * Servlet implementation class Jdbcsample
- */
-@WebServlet("/LoginServlet")
-public class Login extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Login() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+public class Login_Servlet
+{
+	public Auth_Info Authentication(HttpServletRequest request, HttpServletResponse response, HttpSession Session)
 	{
 		response.setContentType("text/html; charset=UTF-8");
 
 		String Auto_flg = "";				//← 自動ログインフラグ
 		Auth_Info Auth_Info;				//← 認証情報
-		PrintWriter display_out = null; 	//← 画面出力用変数
-		HttpSession Session = null;		//← セッション情報
 
 		//↓ セッション情報取得
 		Session = request.getSession();
@@ -62,74 +39,7 @@ public class Login extends HttpServlet {
 			//↓ 手動ログイン認証
 			Auth_Info = Input_Login(request, response, Session);
 
-		//↓ 認証成功
-		if(Auth_Info.getResult_Content().equals("true"))
-		{
-			display_out = response.getWriter();
-
-			Session.setAttribute("Alert_flg", "false");
-			Session.setAttribute("Login_User", Auth_Info.getLogin_User());
-
-			//↓↓ ログインユーザ名をリクエストボディへ設定し、メインメニュー画面へ画面遷移
-			display_out.println("<html>");
-			display_out.println("<head>");
-			display_out.println("<body onload=\"document.Login_Accept.submit()\">");
-			display_out.println("<form method=\"post\" name=\"Login_Accept\" action=\"./Main_Menu.jsp\" >");
-			display_out.println("<input type=\"hidden\" id=\"Login_User\" name=\"Login_User\" value=\"" + Auth_Info.getLogin_User() + "\">");
-			display_out.println("</form>");
-			display_out.println("</body>");
-			display_out.println("</head>");
-			display_out.println("</html>");
-		}
-		else
-		{
-			//↓ 手動ログイン失敗
-			if(Auth_Info.getResult_Content().equals("false"))
-			{
-				//↓ セッション破棄(セッションハイジャック対策)
-				Session.invalidate();
-
-				//↓ 新規セッションを開始
-				Session = request.getSession();
-
-				//↓ 認証失敗エラーフラグをAFailedにし、ログイン画面へリダイレクト
-				Session.setAttribute("Alert_flg", "Failed");
-
-				response.sendRedirect("./Login_Disp.jsp");
-			}
-			else
-			{
-				//↓ 自動ログイン失敗
-				if(Auth_Info.getResult_Content().equals("redirect"))
-				{
-					//↓ 自動ログインをオフにする(一応、変えておく。。。)
-					Session.setAttribute("Auto_flg", "false");
-
-					//↓ セッション破棄(セッションハイジャック対策)
-					Session.invalidate();
-
-					//↓ 新規セッションを開始
-					Session = request.getSession();
-
-					//↓ 認証失敗ではない為、エラーフラグはfalse
-					Session.setAttribute("Alert_flg", "false");
-					response.sendRedirect("./Login_Disp.jsp");
-				}
-				else
-				{
-					//↓ 異常終了
-					if(Auth_Info.getResult_Content().equals("error"))
-					{
-						//↓ エラーコード取得
-						request.setAttribute("Error_Code", Auth_Info.getError_Code());
-
-						//↓ 異常終了画面遷移
-						RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-						dispatch.forward(request, response);
-					}
-				}
-			}
-		}
+		return Auth_Info;
 	}
 
 	//↓ 手動ログイン
@@ -171,8 +81,9 @@ public class Login extends HttpServlet {
 			//↓ カーソル行数が0件または2件以上の場合、ログイン失敗画面へ画面遷移
 			if(rset.getRow() != 1)
 			{
-				//↓ ログ出力
-				log("ユーザID「" + User_ID + "」さんが該当情報なしにより手動ログイン処理に失敗しました。");
+
+				//↓ DB切断
+				connection.close();
 
 				//↓ 認証失敗
 				Auth_Info.setResult_Content("false");
@@ -186,14 +97,56 @@ public class Login extends HttpServlet {
 				//↓ パスワードの比較
 				if(Cipher_Util.passcheck(User_Password, rset.getString("USER_PASSWORD")))
 				{
-					//↓ オートログインのチェックが入っている場合、ログイン情報を保持
+					//↓ ログイン情報を保持(自動ログイン関係なく、ログイントークンを利用して情報管理していく)
+					String User_Token = "";
+					Date Current_Time = null;
+					Date Expiration_Date = null;
+					int sResult = 0;					//← SQL登録実行結果
+					ResultSet Session_Result = null;	//← SQL抽出実行結果
+
+					Session_Result = Database_Util.Search_Session(connection, Session.getId());
+
+					Session_Result.last();
+					if(Session_Result.getRow() == 1)
+					{
+						// 既存のセッションが登録されている場合
+
+						//↓ カーソルを先頭行へ移動
+						Session_Result.first();
+
+						//↓ ユーザ名取得
+						login_user = Session_Result.getString("USER_NAME");
+						Auth_Info.setLogin_User(login_user);
+
+						//↓ DB切断
+						connection.close();
+
+						//↓ 認証成功
+						Auth_Info.setResult_Content("true");
+						return Auth_Info;
+					}
+					else
+					{
+						if(Session_Result.getRow() != 0)
+						{
+							// セッションIDが複数登録されている場合
+
+							//↓ 2:手動ログイン処理時の想定外エラー
+							Auth_Info.setError_Code(2);
+
+							//↓ DB切断
+							connection.close();
+
+							//↓ 処理異常終了
+							Auth_Info.setResult_Content("error");
+							return Auth_Info;
+						}
+					}
+
+
+					//↓ 自動ログインチェックフラグがtrueの場合、セッションに自動ログインフラグを保持
 					if(Auto_Login_Check != null && Auto_Login_Check.equals("true"))
 					{
-						String User_Token = "";
-						Date Current_Time = null;
-						Date Expiration_Date = null;
-						int sResult = 0;					//← SQL実行結果
-
 						final String datePattern = "yyyy/MM/dd HH:mm:ss";
 
 						//↓ ユーザIDを基にログイントークンを作成
@@ -209,48 +162,57 @@ public class Login extends HttpServlet {
 						//↓　Calendar型の日時をDate型へ戻す
 						Expiration_Date = calendar.getTime();
 
-						//↓ ログイントークンをDBへ登録
-						sResult = Database_Util.Register_Token(connection, Session.getId(), User_ID, User_Token, new SimpleDateFormat(datePattern).format(Expiration_Date));
+						//↓ セッションID、ログイントークンをDBへ登録
+						sResult = Database_Util.Register_Session(connection, Session.getId(), User_ID, User_Token, new SimpleDateFormat(datePattern).format(Expiration_Date));
+					}
+					else
+					{
+						//↓ セッションIDのみDBへ登録
+						sResult = Database_Util.Register_Session(connection, Session.getId(), User_ID);
+					}
 
-						//↓ DB登録処理結果の確認
-						if(sResult == 1)
+					//↓ DB登録処理結果の確認
+					if(sResult == 1)
+					{
+						//DB処理正常終了
+
+						//↓ DB処理結果反映
+						connection.commit();
+
+						//↓ 自動ログインチェックフラグがtrueの場合、セッションに自動ログインフラグを保持
+						if(Auto_Login_Check != null && Auto_Login_Check.equals("true"))
 						{
-							//DB処理正常終了
-
-							//↓ DB処理結果反映
-							connection.commit();
-
 							//↓ ログイントークンをクッキーへ登録
 							Cookie cookie = new Cookie("User_Token", User_Token);
 							response.addCookie(cookie);
 
-							//↓ セッションで自動ログインフラグを保持
+							//↓ 自動ログインフラグをセッションへ設定
 							Session.setAttribute("Auto_flg", "true");
 						}
-						else
-						{
-							//DB処理異常終了
+					}
+					else
+					{
+						//DB処理異常終了
 
-							//↓ ログ出力
-							log("ユーザID「" + User_ID + "」さんがログイントークン登録処理に失敗しました。SQL出力結果【sResult=「" + sResult + "」】");
+						//↓ ログ出力
+						//log("ユーザID「" + User_ID + "」さんがログイントークン登録処理に失敗しました。SQL出力結果【sResult=「" + sResult + "」】");
 
-							//↓ DB処理結果ロールバック
-							connection.rollback();
+						//↓ DB処理結果ロールバック
+						connection.rollback();
 
-							//↓ エラーコード付与(1:登録処理中のロールバック)
-							Auth_Info.setError_Code(1);
+						//↓ エラーコード付与(1:登録処理中のロールバック)
+						Auth_Info.setError_Code(1);
 
-							//↓ 異常終了画面遷移
-							Auth_Info.setResult_Content("error");
-							return Auth_Info;
-						}
+						//↓ 異常終了画面遷移
+						Auth_Info.setResult_Content("error");
+						return Auth_Info;
 					}
 					//↓ ユーザ名取得
 					login_user = rset.getString("USER_NAME");
 					Auth_Info.setLogin_User(login_user);
 
-					//↓ ログ出力
-					log("ユーザID「" + User_ID + "」さんが手動ログイン処理に成功しました。");
+					//↓ DB切断
+					connection.close();
 
 					//↓ 認証成功
 					Auth_Info.setResult_Content("true");
@@ -258,8 +220,8 @@ public class Login extends HttpServlet {
 				}
 				else
 				{
-					//↓ ログ出力
-					log("ユーザID「" + User_ID + "」さんがパスワード不一致により手動ログイン処理に失敗しました。");
+					//↓ DB切断
+					connection.close();
 
 					//↓ 認証失敗
 					Auth_Info.setResult_Content("false");
@@ -269,12 +231,8 @@ public class Login extends HttpServlet {
 
 		} catch (SQLException e) {
 			// ↓ログ出力
-			log("ユーザID「" + User_ID + "」さんの手動ログイン処理時、SQL実行エラーが発生しました。");
-			log("ユーザID「" + User_ID + "」:" + e.getStackTrace());
+			e.getStackTrace();
 		}
-
-		//↓ ログ出力
-		log("「" + User_ID + "」さんの手動ログイン処理時に最下行に到達しました。クライアントには異常終了画面を表示します。");
 
 		//↓ エラーコード付与(2:手動ログイン処理時の想定外エラー)
 		Auth_Info.setError_Code(2);
@@ -318,8 +276,6 @@ public class Login extends HttpServlet {
 			//↓ ログイントークンを取得できなければ認証失敗
 			if(!Acquire_flg)
 			{
-				//↓ ログ出力
-				log("クッキー情報からログイントークンを取得できませんでした。");
 
 		        //↓ ログイン画面へリダイレクト
 				Auth_Info.setResult_Content("redirect");
@@ -344,12 +300,15 @@ public class Login extends HttpServlet {
 			if(rset.getRow() != 1)
 			{
 				//↓ ログ出力
-				log("ログイントークン「" + User_Token + "」がDBに存在しませんでした。");
+				//log("ログイントークン「" + User_Token + "」がDBに存在しませんでした。");
 
 				//↓ クライアント側のログイントークンを削除
 				Cookie Delete_Token = new Cookie("User_Token", "");
 				Delete_Token.setMaxAge(0);
 				response.addCookie(Delete_Token);
+
+				//↓ DB切断
+				connection.close();
 
 				//↓ 認証失敗
 				Auth_Info.setResult_Content("redirect");
@@ -387,8 +346,8 @@ public class Login extends HttpServlet {
 						//↓ DB処理結果反映
 						connection.commit();
 
-						//↓ ログ出力
-						log("ログイントークン「" + User_Token + "」の有効期限切れログイントークン削除処理に成功しました。");
+						//↓ DB切断
+						connection.close();
 
 						//↓ リダイレクト
 						Auth_Info.setResult_Content("redirect");
@@ -398,14 +357,14 @@ public class Login extends HttpServlet {
 					{
 						//削除処理異常終了
 
-						//↓ ログ出力
-						log("ログイントークン「" + User_Token + "」の有効期限切れログイントークン削除処理に失敗しました。SQL実行結果【sResult=" + sResult + "】");
-
 						//↓ DB処理結果ロールバック
 						connection.rollback();
 
 						//↓ エラーコード付与(3:有効期限切れログイントークン削除処理中のロールバック)
 						Auth_Info.setError_Code(3);
+
+						//↓ DB切断
+						connection.close();
 
 						//↓ 異常処理結果画面遷移
 						Auth_Info.setResult_Content("error");
@@ -416,20 +375,16 @@ public class Login extends HttpServlet {
 				//↓ ユーザ名取得
 				Auth_Info.setLogin_User(Login_User);
 
-				//↓ ログ出力
-				log("ログイントークン「" + User_Token + "」による自動ログイン処理に成功しました。");
+				//↓ DB切断
+				connection.close();
 
 				//↓ 認証成功
 				Auth_Info.setResult_Content("true");
 				return Auth_Info;
 			}
 		} catch (SQLException e) {
-			log("ログイントークン「" + User_Token + "」の自動ログイン処理時、SQL実行エラーが発生しました。");
-			log("ログイントークン「" + User_Token + "」:" + e.getStackTrace());
+			e.getStackTrace();
 		}
-
-		//↓ ログ出力
-		log("ログイントークン「" + User_Token + "」の自動ログイン処理時、最下行まで到達しました。クライアントには異常処理画面を表示します。");
 
 		//↓ エラーコード付与(4:自動ログイン処理中の想定外エラー)
 		Auth_Info.setError_Code(4);

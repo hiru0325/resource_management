@@ -53,8 +53,8 @@ public class Change_Password extends HttpServlet {
 		//↓ データベース接続
 		connection = Database_Util.DB_Connection();
 
-		//↓ ユーザ検索処理
-		rset = Database_Util.Search_User(connection, User_ID, Before_pw);
+		//↓ 現パスワードチェック
+
 
 		try
 		{

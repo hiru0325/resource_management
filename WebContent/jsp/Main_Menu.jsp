@@ -1,17 +1,99 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="members.Login_Servlet" %>
+<%@ page import="info.Auth_Info" %>
 <%
 
-	String Send_flg = "";			//← 画面遷移フラグ
+	String Send_flg = "";					//← 画面遷移フラグ
+	String Login_User = "";				//← ユーザ名
 	HttpSession Session = null;		//← セッション情報
-
-	Session = request.getSession();
-
-	//リクエストよりログインユーザ名の取得
-	String Login_User = request.getParameter("Login_User");
 
 	//↓ 画面遷移フラグ取得
 	Send_flg = request.getParameter("Send_flg");
+
+	//↓ セッション情報取得
+	Session = request.getSession();
+
+	if(Send_flg == null)
+	{
+		//↓ メインメニュー画面へ直接アクセスした場合はログイン画面へリダイレクト
+		Session.setAttribute("Alert_flg", "false");
+		response.sendRedirect("./Login_Disp.jsp");
+	}
+
+	//↓ ログイン処理
+	if(Send_flg != null && Send_flg.equals("Login"))
+	{
+		Auth_Info Auth_Info = null;	//← 認証結果情報
+		//↓インスタンス化
+		Login_Servlet Login_Servlet = new Login_Servlet();
+
+		//↓ ログイン認証処理
+		Auth_Info = Login_Servlet.Authentication(request, response, Session);
+
+		if(Auth_Info.getResult_Content().equals("true"))
+		{
+			// 手動ログイン認証成功
+
+			//↓ ユーザ名取得
+			Login_User = Auth_Info.getLogin_User();
+		}
+		else
+		{
+			if(Auth_Info.getResult_Content().equals("false"))
+			{
+				// 手動ログイン認証失敗
+
+				//↓ セッション破棄(セッションハイジャック対策)
+				Session.invalidate();
+				//↓ 新規セッションを開始
+				Session = request.getSession();
+
+				//↓ 認証失敗エラーフラグをFailedにし、ログイン画面へリダイレクト
+				Session.setAttribute("Alert_flg", "Failed");
+				response.sendRedirect("./Login_Disp.jsp");
+
+				return;
+			}
+			else
+			{
+				if(Auth_Info.getResult_Content().equals("redirect"))
+				{
+					// 自動ログイン認証失敗
+
+					//↓ 自動ログインをオフにする(一応、変えておく。。。)
+					Session.setAttribute("Auto_flg", "false");
+
+					//↓ セッション破棄(セッションハイジャック対策)
+					Session.invalidate();
+					//↓ 新規セッションを開始
+					Session = request.getSession();
+
+					//↓ 認証失敗ではない為、エラーフラグはfalse
+					Session.setAttribute("Alert_flg", "false");
+					response.sendRedirect("./Login_Disp.jsp");
+
+					return;
+				}
+				else
+				{
+					//if(Auth_Result.equals("error"))
+					if(Auth_Info.getResult_Content().equals("error"))
+					{
+						// 処理異常終了
+
+						//↓ セッションへエラーコード設定
+						Session.setAttribute("Error_Code", Auth_Info.getError_Code());
+						//↓ 異常終了画面遷移
+						RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+						Error_Dispatch.forward(request, response);
+
+						return;
+					}
+				}
+			}
+		}
+	}
 
 	//↓パスワード変更処理
 	if(Send_flg != null && Send_flg.equals("Change_Password"))
@@ -39,7 +121,14 @@
 <body>
 	<script type="text/javascript">
 
-	var Send_flg;
+	var Send_flg;	//← リクエスト要求フラグ
+
+	//↓ ウィンドウを閉じる前に実行
+	window.onbeforeunload = function()
+	{
+		//↓ セッション切断処理
+		document.location.href="../Session_Out";
+	};
 
 	//↓ パスワード変更処理
 	function Send_Change_Password()

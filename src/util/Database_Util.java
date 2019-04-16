@@ -66,7 +66,7 @@ public class Database_Util {
 		return rset;
 	}
 	//↓　ログイントークン登録処理
-	public static int Register_Token(Connection connection,String Session_ID, String User_ID, String User_Token, String Expiration_Date)
+	public static int Register_Session(Connection connection,String Session_ID, String User_ID, String User_Token, String Expiration_Date)
 	{
 		//↓ ログイントークン登録SQL文
 		final String sQuery = "insert into "
@@ -109,6 +109,76 @@ public class Database_Util {
 		return sResult;
 	}
 
+	//↓　セッションID登録処理
+	public static int Register_Session(Connection connection,String Session_ID, String User_ID)
+	{
+		//↓ SQL文
+		final String sQuery = "insert into "
+							+ "AUTO_MANAGEMENT_TBL "
+							+ "("
+							+ "SESSION_ID, "
+							+ "USER_ID "
+							+ ") "
+							+ "values "
+							+ "( "
+							+ "?, "
+							+ "? "
+							+ ");";
+		PreparedStatement pStmt = null;													//← SQL実行変数
+		int sResult = 0;																	//← SQL実行結果格納変数
+
+		try
+		{
+			//↓ SQL文セット(コンパイル)
+			pStmt = connection.prepareStatement(sQuery);
+			//↓ パラメータ代入
+			pStmt.setString(1, Session_ID);			//← セッションID
+			pStmt.setString(2, User_ID);			//← ユーザID
+
+			//↓ SQL文実行
+			sResult = pStmt.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		pStmt = null;
+
+		return sResult;
+	}
+
+	//↓ セッションID検索処理
+	public static ResultSet Search_Session(Connection connection, String Session_ID)
+	{
+		PreparedStatement pStmt = null;		//← SQL実行変数
+		ResultSet rset = null;				//← SQL実行結果変数
+		//↓ SQL文
+		final String sQuery = "select "
+							+ "USER_NAME, "
+							+ "EXPIRATION_DATE "
+							+ "from "
+							+ "AUTO_MANAGEMENT_TBL "
+							+ "inner join USER_MANAGEMENT_TBL on (AUTO_MANAGEMENT_TBL.USER_ID = USER_MANAGEMENT_TBL.USER_ID) "
+							+ "where "
+							+ "Session_ID = ?";
+
+		try {
+			//↓ SQL文セット(コンパイル)
+			pStmt = connection.prepareStatement(sQuery);
+			//↓ ログイントークン格納
+			pStmt.setString(1, Session_ID);
+			rset = pStmt.executeQuery();
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+		pStmt = null;
+
+		return rset;
+	}
+
 	//↓ ログイントークン検索処理
 	public static ResultSet Search_Token(Connection connection, String User_Token)
 	{
@@ -138,6 +208,33 @@ public class Database_Util {
 		pStmt = null;
 
 		return rset;
+	}
+
+	//↓ セッション削除処理
+	public static int Delete_Session(Connection connection, String Session_ID)
+	{
+		PreparedStatement pStmt = null;		//← SQL実行変数
+		int sResult = 0;						//← SQL実行結果格納変数
+		//↓ SQL文
+		final String sQuery = "delete from "
+								+ "AUTO_MANAGEMENT_TBL "
+								+ "where "
+								+ "SESSION_ID = ?";
+
+		try {
+			//↓ SQL文セット(コンパイル)
+			pStmt = connection.prepareStatement(sQuery);
+			//↓ ログイントークン格納
+			pStmt.setString(1, Session_ID);
+			sResult = pStmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+		pStmt = null;
+
+		return sResult;
 	}
 
 	//↓ ログイントークン削除処理

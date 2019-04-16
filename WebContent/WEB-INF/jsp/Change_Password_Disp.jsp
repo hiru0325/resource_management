@@ -49,8 +49,6 @@
 			<h3>パスワード変更画面</h3>
 			<p>下記、項目を入力してください。</p>
 			<form name="Change_Password_Form" method="post" action="">
-				<p>ユーザID</p>
-				<input type="text" id="User_ID" name="User_ID" />
 				<p>現在のパスワード</p>
 				<input type="password" id="Before_pw" name="Before_pw" />
 				<p>新しいパスワード</p>

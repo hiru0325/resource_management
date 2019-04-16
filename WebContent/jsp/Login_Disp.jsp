@@ -12,18 +12,6 @@
 	//↓ セッション情報取得
 	Session = request.getSession();
 
-	Login_flg = request.getParameter("Login");
-
-	//↓ ログイン要求が確認できた場合、ログイン処理へフォワードする
-	if(Login_flg != null && Login_flg.equals("Login"))
-	{
-		RequestDispatcher dispatch = request.getRequestDispatcher("../LoginServlet");
-		dispatch.forward(request, response);
-
-		//↓ 処理を遷移した後、処理は後続される為、処理を強制的に終了させる。
-		return;
-	}
-
 	//↓ セッション情報より自動ログインフラグを取得
 	Auto_flg = (String)Session.getAttribute("Auto_flg");
 
@@ -60,7 +48,7 @@
 				document.getElementById("disp").style.display="none";
 				var Login_flg = document.createElement('input');
 				Login_flg.setAttribute('type', 'hidden');
-				Login_flg.setAttribute('name', 'Login');
+				Login_flg.setAttribute('name', 'Send_flg');
 				Login_flg.setAttribute('value', 'Login');
 				document.Login_Form.appendChild(Login_flg);
 				document.Login_Form.submit();
@@ -85,15 +73,13 @@
 
 		};
 
-		//↓ ウィンドウを閉じたの時の処理
+		//↓ ウィンドウを閉じる前に実行
 		window.onbeforeunload = function()
 		{
-			<% String Login = (String)request.getAttribute("Login"); %>
-			if("<%= Login %>" == "Login")
-			{
-				alert("Login");
-			}
+			//↓ セッション切断処理
+			document.location.href="../Session_Out";
 		};
+
 		//↓ フォーム送信処理
 		function Send_Function()
 		{
@@ -120,10 +106,9 @@
 					}
 					var Login_flg = document.createElement('input');
 					Login_flg.setAttribute('type', 'hidden');
-					Login_flg.setAttribute('name', 'Login');
+					Login_flg.setAttribute('name', 'Send_flg');
 					Login_flg.setAttribute('value', 'Login');
 					document.Login_Form.appendChild(Login_flg);
-					<% Session.setAttribute("Login", "Login"); %>
 					//↓ フォーム内容を送信
 					document.Login_Form.submit();
 				}
@@ -136,7 +121,10 @@
 		<div class="inner">
 			<h3>ログイン画面</h3>
 			<br>
+			<!--
 			<form name="Login_Form" method="post">
+			 -->
+			 <form name="Login_Form" method="post" action="./Main_Menu.jsp">
 				<p>ユーザID</p>
 				<input type="text" id="user_id" name="user_id" value="" />
 				<p>パスワード</p>

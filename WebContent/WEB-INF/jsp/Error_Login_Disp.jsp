@@ -24,8 +24,8 @@
 	{
 		case 1:
 					//↓ 1:登録処理中のDBロールバック
-					Error_Title = "自動ログイン設定エラー";
-					Error_Content_1 = "自動ログインの設定に失敗しました。";
+					Error_Title = "ログインエラー";
+					Error_Content_1 = "ログイン処理中にエラーが発生しました。";
 					Error_Content_2 = "システム管理者へお問い合わせ下さい。";
 					break;
 		case 2:
