@@ -34,6 +34,15 @@
 	<!-- ↓ javascript処理 -->
 	<script type="text/javascript">
 
+		//↓ 履歴保持の無効化
+		history.pushState(null, null, null);
+		//↓ ウィンドウの戻るボタン無効化
+		window.addEventListener('popstate', function()
+		{
+			alert("本ページの戻るボタンは禁止です。");
+			history.pushState(null, null, null);
+		}, false);
+
 		//↓ ログイン画面読み込み時、実行
 		//↓ セッション情報が保持されていた場合、オートログイン実施。
 		window.onload = function()

@@ -72,6 +72,16 @@
 <title>異常終了画面</title>
 </head>
 <body>
+	<script type="text/javascript">
+		//↓ 履歴保持の無効化
+		history.pushState(null, null, null);
+		//↓ ウィンドウの戻るボタン無効化
+		window.addEventListener('popstate', function()
+		{
+			alert("本ページの戻るボタンは禁止です。");
+			history.pushState(null, null, null);
+		}, false);
+	</script>
 	<div class="parent">
 		<div class="inner">
 			<h3 id="Error_Title"><%= Error_Title %></h3>
