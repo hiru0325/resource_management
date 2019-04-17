@@ -34,7 +34,7 @@
 		//↓ ログ表示
 		log("「" + Session.getId() + "」がログイン処理を開始しました。");
 		//↓ ログイン認証処理
-		Auth_Info = Login_Servlet.Authentication(request, response, Session);
+		Auth_Info = Login_Servlet.Authentication(request, response);
 
 		if(Auth_Info.getResult_Content().equals("true"))
 		{

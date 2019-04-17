@@ -18,12 +18,16 @@ import util.Database_Util;
 
 public class Login_Servlet
 {
-	public Auth_Info Authentication(HttpServletRequest request, HttpServletResponse response, HttpSession Session)
+	public Auth_Info Authentication(HttpServletRequest request, HttpServletResponse response)
 	{
 		response.setContentType("text/html; charset=UTF-8");
 
 		String Auto_flg = "";				//← 自動ログインフラグ
 		Auth_Info Auth_Info;				//← 認証情報
+		HttpSession Session = null;			//← ログイン情報
+
+		//↓ セッション情報取得
+		Session = request.getSession();
 
 		//↓　自動ログインフラグ取得
 		Auto_flg = (String)Session.getAttribute("Auto_flg");
@@ -31,22 +35,26 @@ public class Login_Servlet
 		//↓ 自動ログインフラグの確認
 		if(Auto_flg != null && Auto_flg.equals("true"))
 			//↓　自動ログイン認証
-			Auth_Info = Auto_Login(request, response, Session);
+			Auth_Info = Auto_Login(request, response);
 		else
 			//↓ 手動ログイン認証
-			Auth_Info = Input_Login(request, response, Session);
+			Auth_Info = Input_Login(request, response);
 
 		return Auth_Info;
 	}
 
 	//↓ 手動ログイン
-	private Auth_Info Input_Login(HttpServletRequest request, HttpServletResponse response, HttpSession Session)
+	private Auth_Info Input_Login(HttpServletRequest request, HttpServletResponse response)
 	{
 		String User_ID = "";			//← リクエストユーザID
 		String User_Password = "";		//← リクエストユーザパスワード
 		String Auto_Login_Check = ""; 	//← オートログインチェックボックス値
 		String login_user = "";			//← DBで取得したユーザ名
 		Auth_Info Auth_Info = null;		//← 認証情報
+		HttpSession Session = null;		//← セッション情報
+
+		//↓ セッション情報取得
+		Session = request.getSession();
 
 		//↓ Auth_Infoインスタンス化
 		Auth_Info = new Auth_Info();
@@ -163,9 +171,6 @@ public class Login_Servlet
 					{
 						//DB処理異常終了
 
-						//↓ ログ出力
-						//log("ユーザID「" + User_ID + "」さんがログイントークン登録処理に失敗しました。SQL出力結果【sResult=「" + sResult + "」】");
-
 						//↓ DB処理結果ロールバック
 						connection.rollback();
 
@@ -212,12 +217,12 @@ public class Login_Servlet
 	}
 
 	//↓ 自動ログイン
-	private Auth_Info Auto_Login(HttpServletRequest request, HttpServletResponse response, HttpSession Session)
+	private Auth_Info Auto_Login(HttpServletRequest request, HttpServletResponse response)
 	{
-		Cookie cookie[];					//← クッキー情報格納変数
+		Cookie cookie[];				//← クッキー情報格納変数
 		String Login_User = "";			//← 抽出したユーザ名
 		String User_Token = "";			//← ログイントークン
-		Date Expiration_Date = null;		//← ログイントークン有効期限
+		Date Expiration_Date = null;	//← ログイントークン有効期限
 		Auth_Info Auth_Info = null;		//← 認証情報
 
 		//↓ Auth_Infoインスタンス化
