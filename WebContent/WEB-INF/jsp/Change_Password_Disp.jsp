@@ -1,11 +1,64 @@
+<%@page import="members.Change_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="info.Auth_Info" %>
 <%
 	String Send_flg = "";		//← 送信区分
+	String Alert_flg = "";		//← アラートフラグ
 
 	//↓ 送信区分取得
 	Send_flg = request.getParameter("Send_flg");
 
+	//↓ パスワード変更処理
+	if(Send_flg != null && Send_flg.equals("Change"))
+	{
+		HttpSession Session = null;
+		Auth_Info Auth_Info = null;
+		String Before_pw = "";
+		String After_pw = "";
+
+		//↓　セッション情報取得
+		Session = request.getSession();
+
+		Change_Servlet Change_Servlet = new Change_Servlet();
+
+		//↓ 現パスワードをリクエストボディ部から受信
+		Before_pw = request.getParameter("Before_pw");
+		//↓ 新パスワードをリクエストボディ部から受信
+		After_pw = request.getParameter("After_pw");
+
+		//↓ パスワード変更処理
+		Auth_Info = Change_Servlet.Change_Password(Session, Before_pw, After_pw);
+
+		if(Auth_Info.getResult_Content().equals("true"))
+		{
+			//↓ パスワード変更処理正常終了
+
+		}
+		else
+		{
+			if(Auth_Info.getResult_Content().equals("false"))
+			{
+				//↓ 現パスワード認証失敗
+				Alert_flg = "Failed";
+			}
+			else
+			{
+				if(Auth_Info.getResult_Content().equals("error"))
+				{
+					//  パスワード変更処理異常終了
+
+					//↓ セッションへエラーコード設定
+					Session.setAttribute("Error_Code", Auth_Info.getError_Code());
+					//↓ 異常終了画面遷移
+					RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+					Error_Dispatch.forward(request, response);
+				}
+			}
+		}
+	}
+
+	//↓ メインメニューへ戻る
 	if(Send_flg != null && Send_flg.equals("Once"))
 	{
 		//↓ メインメニュー画面へ戻る
@@ -34,6 +87,12 @@
 		{
 			//↓ 初期化
 			Alive_flg = false;
+
+			//↓ 認証失敗時のアラートメッセージ
+			if("<%= Alert_flg %>" == "Failed")
+			{
+				alert("認証に失敗しました。\nパスワードをご確認ください。");
+			}
 		};
 
 		//↓ 送信区分付与処理
@@ -65,6 +124,11 @@
 			//↓ 新パスワードと確認パスワードの比較
 			if(After_pw.value == Confirm_pw.value)
 			{
+				var Send_flg = document.createElement('input');
+				Send_flg.setAttribute('type', 'hidden');
+				Send_flg.setAttribute('name', 'Send_flg');
+				Send_flg.setAttribute('value', 'Change');
+				document.Change_Password_Form.appendChild(Send_flg);
 				//↓ パスワード変更処理へ移行
 				document.Change_Password_Form.submit();
 			}
@@ -91,9 +155,7 @@
 				<br>
 				<br>
 				<!-- パスワード変更ボタン -->
-				<!--
 				<input type="button" name="update" value="パスワード変更" onclick="Check_Password()" />
-				 -->
 				<br>
 				<br>
 			</form>

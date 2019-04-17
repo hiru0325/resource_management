@@ -120,7 +120,7 @@
 		Return_Servlet Return_Servlet = new Return_Servlet();
 
 		//↓ ログイン情報取得処理
-		Auth_Info = Return_Servlet.Select_Info(request, response, session);
+		Auth_Info = Return_Servlet.Select_Info(request, response);
 
 		if(Auth_Info.getResult_Content().equals("true"))
 		{
@@ -220,9 +220,6 @@
 			 -->
 			<br>
 			<br>
-			<!--
-			<button onclick="location.href='./Change_Password_Disp.jsp'">パスワード変更</button>
-			-->
 			<form name="Change_Password_Form" method="post">
 				<input type="button" name="Change_Password_btn" onclick="Send_Change_Password()" value="パスワード変更" />
 			</form>

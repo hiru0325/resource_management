@@ -21,9 +21,9 @@ public class Login_Servlet
 	{
 		response.setContentType("text/html; charset=UTF-8");
 
-		String Auto_flg = "";				//← 自動ログインフラグ
-		Auth_Info Auth_Info;				//← 認証情報
-		HttpSession Session = null;			//← ログイン情報
+		String Auto_flg = "";					//← 自動ログインフラグ
+		Auth_Info Auth_Info = null;				//← 認証情報
+		HttpSession Session = null;				//← ログイン情報
 
 		//↓ セッション情報取得
 		Session = request.getSession();

@@ -39,7 +39,7 @@ public class Logout_Servlet extends HttpServlet {
 
 		String Auto_flg = "";				//← 自動ログインフラグ
 		Connection connection = null;		//← DB接続情報
-		ResultSet rset = null;
+		ResultSet rset = null;				//← SQL実行結果
 		int sResult = 0;					//← SQL実行結果
 		HttpSession Session = null;			//← セッション情報
 

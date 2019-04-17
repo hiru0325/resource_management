@@ -13,16 +13,20 @@ import util.Database_Util;
 
 public class Return_Servlet
 {
-	public Auth_Info Select_Info(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+	public Auth_Info Select_Info(HttpServletRequest request, HttpServletResponse response)
 	{
+		HttpSession Session = null;		//← セッション情報
 		Connection connection = null;	//← DB接続情報
 		ResultSet rset = null;			//←　SQL実行結果情報
 		Auth_Info Auth_Info = null;		//← 照会結果格納
 
+		//↓ セッション情報取得
+		Session = request.getSession();
+
 		//↓ DB接続処理
 		connection = Database_Util.DB_Connection();
 		//↓ セッション検索処理
-		rset = Database_Util.Search_Session(connection, session.getId());
+		rset = Database_Util.Search_Session(connection, Session.getId());
 
 		//↓ Auth_Info インスタンス化
 		Auth_Info = new Auth_Info();
