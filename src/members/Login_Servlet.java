@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -161,7 +160,14 @@ public class Login_Servlet
 						{
 							//↓ ログイントークンをクッキーへ登録
 							Cookie cookie = new Cookie("User_Token", User_Token);
+							//↓ トークンにSecure属性付与(HTTPS通信切り替え時にコメント解除)
+							//cookie.setSecure(true);
+							//↓ javascriptからの取得を抑止
+							cookie.setHttpOnly(true);
 							response.addCookie(cookie);
+
+							//↓ セッション有効期限はDBで管理するため、無制限に設定。
+							Session.setMaxInactiveInterval(-1);
 
 							//↓ 自動ログインフラグをセッションへ設定
 							Session.setAttribute("Auto_flg", "true");
@@ -250,7 +256,6 @@ public class Login_Servlet
 			//↓ ログイントークンを取得できなければ認証失敗
 			if(!Acquire_flg)
 			{
-
 		        //↓ ログイン画面へリダイレクト
 				Auth_Info.setResult_Content("redirect");
 				return Auth_Info;
@@ -273,8 +278,8 @@ public class Login_Servlet
 			//↓ 検索ヒット数があれば認証成功、なければ認証失敗
 			if(rset.getRow() != 1)
 			{
-				//↓ ログ出力
-				//log("ログイントークン「" + User_Token + "」がDBに存在しませんでした。");
+				System.out.println("ログイントークン抽出失敗");
+				System.out.println("ログイントークン：" + User_Token);
 
 				//↓ クライアント側のログイントークンを削除
 				Cookie Delete_Token = new Cookie("User_Token", "");

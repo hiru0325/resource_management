@@ -26,6 +26,7 @@
 
 	if(Send_flg != null && Send_flg.equals("Login"))
 	{
+		Session.setAttribute("Alive_flg", "true");
 		//↓ メインメニュー画面へ画面遷移し、認証処理を実行する。
 		RequestDispatcher Login_dispatch = request.getRequestDispatcher("./Main_Menu.jsp");
 		Login_dispatch.forward(request, response);
@@ -44,26 +45,25 @@
 </head>
 <body>
 	<!-- ↓ javascript処理 -->
+	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
 
-		//↓ 履歴保持の無効化
-		history.pushState(null, null, null);
-		//↓ ウィンドウの戻るボタン無効化
-		window.addEventListener('popstate', function()
-		{
-			alert("本ページの戻るボタンは禁止です。");
-			history.pushState(null, null, null);
-		}, false);
+		var Alive_flg;						//← 画面遷移フラグ
 
 		//↓ ログイン画面読み込み時、実行
 		//↓ セッション情報が保持されていた場合、オートログイン実施。
 		window.onload = function()
 		{
+			//↓ 初期化
+			Alive_flg = false;
 			//↓ オートログインの初期設定(チェックをはずす)
 			document.Login_Form.Auto_Login_Check.checked = false;
 
 			if("<%= Auto_flg %>" == "true")
 			{
+				//↓ 画面遷移フラグをtrueにしてonbeforeunload回避
+				Alive_flg = true;
+
 				//↓ 一瞬だけログイン画面が表示されて邪魔なので画面そのものを非表示。
 				document.getElementById("disp").style.display="none";
 				var Login_flg = document.createElement('input');
@@ -93,13 +93,6 @@
 
 		};
 
-		//↓ ウィンドウを閉じる前に実行
-		window.onbeforeunload = function()
-		{
-			//↓ セッション切断処理
-			document.location.href="../Session_Out";
-		};
-
 		//↓ フォーム送信処理
 		function Send_Function()
 		{
@@ -124,6 +117,9 @@
 					{
 						document.Login_Form.Auto_Login_Check.value = "true";
 					}
+					//↓ 画面遷移フラグをtrueにしてonbeforeunload回避
+					Alive_flg = true;
+
 					var Login_flg = document.createElement('input');
 					Login_flg.setAttribute('type', 'hidden');
 					Login_flg.setAttribute('name', 'Send_flg');

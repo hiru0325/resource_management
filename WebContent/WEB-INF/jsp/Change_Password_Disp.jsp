@@ -11,6 +11,8 @@
 		//↓ メインメニュー画面へ戻る
 		RequestDispatcher Once_dispatch = request.getRequestDispatcher("../jsp/Main_Menu.jsp");
 		Once_dispatch.forward(request, response);
+
+		return;
 	}
 
 %>
@@ -23,20 +25,38 @@
 </head>
 <body>
 	<!-- ↓ javascript 処理-->
+	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
 
-		//↓ 履歴保持の無効化
-		history.pushState(null, null, null);
-		//↓ ウィンドウの戻るボタン無効化
-		window.addEventListener('popstate', function()
+		var Alive_flg;							//← セッション破棄回避フラグ
+
+		window.onload = function()
 		{
-			alert("本ページの戻るボタンは禁止です。");
-			history.pushState(null, null, null);
-		}, false);
+			//↓ 初期化
+			Alive_flg = false;
+		};
+
+		//↓ 送信区分付与処理
+		function Send_Login()
+		{
+			//↓ セッション破棄回避フラグをtrueにしてonbeforeunload回避
+			Alive_flg = true;
+
+			var Send_flg = document.createElement('input');
+			Send_flg.setAttribute('type', 'hidden');
+			Send_flg.setAttribute('name', 'Send_flg');
+			Send_flg.setAttribute('value', 'Once');
+			document.Back_Form.appendChild(Send_flg);
+			//↓ フォーム内容を送信
+			document.Back_Form.submit();
+		}
 
 		//↓ 入力項目チェック処理
 		function Check_Password()
 		{
+			//↓ セッション破棄回避フラグをtrueにしてonbeforeunload回避
+			Alive_flg = true;
+
 			//↓ 新しいパスワード項目制御
 			var After_pw = document.getElementById("After_pw");
 			//↓ 確認パスワード項目制御
@@ -77,10 +97,9 @@
 				<br>
 				<br>
 			</form>
-			<form method="post">
+			<form name="Back_Form" method="post">
 				<!-- 戻るボタン -->
-				<input type="hidden" name="Send_flg" value="Once" />
-				<input type="submit" name="back" value="メインメニューへ戻る" />
+				<input type="button" name="back" onclick="Send_Login()" value="メインメニューへ戻る" />
 			</form>
 		</div>
 	</div>

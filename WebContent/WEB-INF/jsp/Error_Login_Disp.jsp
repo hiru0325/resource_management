@@ -1,14 +1,30 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%
-	int Error_Code = 0;			//← エラーコード
-	String Error_Title = "";	//← エラーメッセージ(見出し)
+	String Send_flg = "";				//← 送信区分
+	int Error_Code = 0;				//← エラーコード
+	String Error_Title = "";			//← エラーメッセージ(見出し)
 	String Error_Content_1 = "";	//← エラーメッセージ(内容1)
 	String Error_Content_2 = "";	//← エラーメッセージ(内容2)
-	HttpSession Session;		//← セッション情報
+	HttpSession Session;				//← セッション情報
 
 	//↓ 現セッション取得
 	Session = request.getSession();
+
+	//↓ 送信区分取得
+	if(Send_flg != null && Send_flg.equals("Return"))
+	{
+		//↓ セッション破棄(セッションハイジャック対策)
+		Session.invalidate();
+		//↓ 新規セッションを開始
+		Session = request.getSession();
+
+		//↓ ログイン画面へ画面遷移
+		RequestDispatcher Login_Dispatch = request.getRequestDispatcher("../jsp/Main_Menu.jsp");
+		Login_Dispatch.forward(request, response);
+
+		return;
+	}
 
 	//↓ エラーコード取得
 	if(Session.getAttribute("Error_Code") != null)
@@ -16,11 +32,7 @@
 	else
 		Error_Code = 99;
 
-	//↓ セッション破棄(セッションハイジャック対策)
-	Session.invalidate();
-
-	//↓ 新規セッションを開始
-	Session = request.getSession();
+	//↓　いつかXMLファイルで管理する予定。。。
 
 	//↓ エラーコード内容
 	switch (Error_Code)
@@ -77,19 +89,35 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="../css/Menu.css" />
 <meta charset="UTF-8">
 <title>異常終了画面</title>
 </head>
 <body>
+	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
-		//↓ 履歴保持の無効化
-		history.pushState(null, null, null);
-		//↓ ウィンドウの戻るボタン無効化
-		window.addEventListener('popstate', function()
+
+		var Alive_flg;							//← 画面遷移フラグ
+
+		window.onload = function()
 		{
-			alert("本ページの戻るボタンは禁止です。");
-			history.pushState(null, null, null);
-		}, false);
+			//↓ 初期化
+			Alive_flg = false;
+		};
+
+		//↓ 送信区分付与処理
+		function Send_Login()
+		{
+			//↓ セッション破棄回避フラグをtrueにしてonbeforeunload回避
+			Alive_flg = true;
+			var Send_flg = document.createElement('input');
+			Send_flg.setAttribute('type', 'hidden');
+			Send_flg.setAttribute('name', 'Send_flg');
+			Send_flg.setAttribute('value', 'Return');
+			document.Error_Form.appendChild(Send_flg);
+			//↓ フォーム内容を送信
+			document.Error_Form.submit();
+		}
 	</script>
 	<div class="parent">
 		<div class="inner">
@@ -99,7 +127,9 @@
 			<p id="Error_Content_2"><%= Error_Content_2 %></p>
 			<br>
 			<br>
-			<button onclick="location.href='../jsp/Login_Disp.jsp'">ログイン画面に戻る</button>
+			<form name="Error_Form" method="post">
+				<input type="button" name="back" value="ログイン画面へ戻る" onclick="Send_Login()" />
+			</form>
 			<br>
 			<br>
 		</div>

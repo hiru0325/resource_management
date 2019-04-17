@@ -9,19 +9,21 @@
 	String Login_User = "";				//← ユーザ名
 	HttpSession Session = null;		//← セッション情報
 
-	//↓ 画面遷移フラグ取得
-	Send_flg = request.getParameter("Send_flg");
-
 	//↓ セッション情報取得
 	Session = request.getSession();
 
-	if(Send_flg == null)
+	//↓ 画面遷移フラグ取得
+	Send_flg = request.getParameter("Send_flg");
+
+	if(Send_flg == null || Send_flg.equals("Return"))
 	{
 		//↓ メインメニュー画面へ直接アクセスした場合はログイン画面へリダイレクト
 		if(Session.getAttribute("Alert_flg") == null)
 			Session.setAttribute("Alert_flg", "false");
 		RequestDispatcher Login_Dispatch = request.getRequestDispatcher("Login_Disp.jsp");
 		Login_Dispatch.forward(request, response);
+
+		return;
 	}
 
 	//↓ ログイン処理
@@ -142,6 +144,8 @@
 	{
 		RequestDispatcher Change_Passeword_dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
 		Change_Passeword_dispatch.forward(request, response);
+
+		return;
 	}
 
 	//↓ログアウト処理
@@ -149,6 +153,8 @@
 	{
 		RequestDispatcher Logout_dispatch = request.getRequestDispatcher("/LogoutServlet");
 		Logout_dispatch.forward(request, response);
+
+		return;
 	}
 
 %>
@@ -161,38 +167,22 @@
 <title>メインメニュー画面</title>
 </head>
 <body>
+	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
 
+	var Alive_flg;		//← セッション破棄回避フラグ
 	var Send_flg;	//← リクエスト要求フラグ
 
-	//↓ 履歴保持の無効化
-	history.pushState(null, null, null);
-	//↓ ウィンドウの戻るボタン無効化
-	window.addEventListener('popstate', function()
+	window.onload = function()
 	{
-		alert("本ページの戻るボタンは禁止です。");
-		history.pushState(null, null, null);
-	}, false);
-
-	//↓ 履歴保持の無効化
-	history.pushState(null, null, null);
-	//↓ ウィンドウの戻るボタン無効化
-	window.addEventListener('popstate', function()
-	{
-		alert("本ページの戻るボタンは禁止です。");
-		history.pushState(null, null, null);
-	}, false);
-
-	//↓ ウィンドウを閉じる前に実行
-	window.onbeforeunload = function()
-	{
-		//↓ セッション切断処理
-		document.location.href="../Session_Out";
+		Alive_flg = false;
 	};
 
 	//↓ パスワード変更処理
 	function Send_Change_Password()
 	{
+		//↓ 初期化
+		Alive_flg = true;
 		//↓ 画面遷移のフラグ設定
 		Send_flg = document.createElement('input');
 		Send_flg.setAttribute('type', 'hidden');
@@ -206,6 +196,9 @@
 	//↓ ログアウト処理
 	function Send_Logout()
 	{
+		//↓ セッション破棄回避フラグをtrueにしてonbeforeunload回避
+		Alive_flg = true;
+
 		//↓ 画面遷移のフラグ設定
 		Send_flg = document.createElement('input');
 		Send_flg.setAttribute('type', 'hidden');
