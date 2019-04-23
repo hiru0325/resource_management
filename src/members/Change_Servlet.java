@@ -7,10 +7,12 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 
 import info.Auth_Info;
+import login.Login_auth_util;
 import util.Database_Util;
 import util.Cipher_Util;
 
-public class Change_Servlet {
+public class Change_Servlet
+{
 
 	public Auth_Info Change_Password(HttpSession Session, String Before_pw, String After_pw)
 	{

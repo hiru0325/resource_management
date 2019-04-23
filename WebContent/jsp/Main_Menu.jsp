@@ -1,7 +1,7 @@
 <%@page import="members.Return_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="members.Login_Servlet" %>
+<%@ page import="login.Login_Servlet" %>
 <%@ page import="info.Auth_Info" %>
 <%
 
@@ -29,28 +29,27 @@
 	//↓ ログイン処理
 	if(Send_flg != null && Send_flg.equals("Login"))
 	{
-		Auth_Info Auth_Info = null;	//← 認証結果情報
+		int Return_Code = 0;
 		//↓インスタンス化
 		Login_Servlet Login_Servlet = new Login_Servlet();
 
 		//↓ ログ表示
 		log("「" + Session.getId() + "」がログイン処理を開始しました。");
 		//↓ ログイン認証処理
-		Auth_Info = Login_Servlet.Authentication(request, response);
+		Return_Code = Login_Servlet.Authentication(request, response);
 
-		if(Auth_Info.getResult_Content().equals("true"))
+		if(Return_Code == 0)
 		{
 			// ログイン認証成功
 
 			//↓ ログ表示
 			log("「" + Session.getId() + "」がログイン処理で正常終了しました。");
-
-			//ユーザ名取得
-			Login_User = Auth_Info.getLogin_User();
+			//送信区分を変更し、ユーザID取得
+			Send_flg = "Once";
 		}
 		else
 		{
-			if(Auth_Info.getResult_Content().equals("false"))
+			if(Return_Code == 9)
 			{
 				// 手動ログイン認証失敗
 
@@ -69,7 +68,7 @@
 			}
 			else
 			{
-				if(Auth_Info.getResult_Content().equals("redirect"))
+				if(Return_Code == 8)
 				{
 					// 自動ログイン認証失敗
 
@@ -92,21 +91,18 @@
 				}
 				else
 				{
-					if(Auth_Info.getResult_Content().equals("error"))
-					{
-						// 処理異常終了
+					// 処理異常終了
 
-						//↓ ログ表示
-						log("「" + Session.getId() + "」がログイン処理にて異常終了しました。");
+					//↓ ログ表示
+					log("「" + Session.getId() + "」がログイン処理にて異常終了しました。");
 
-						//↓ セッションへエラーコード設定
-						Session.setAttribute("Error_Code", Auth_Info.getError_Code());
-						//↓ 異常終了画面遷移
-						RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-						Error_Dispatch.forward(request, response);
+					//↓ セッションへエラーコード設定
+					Session.setAttribute("Error_Code", Return_Code);
+					//↓ 異常終了画面遷移
+					RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+					Error_Dispatch.forward(request, response);
 
-						return;
-					}
+					return;
 				}
 			}
 		}
