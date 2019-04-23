@@ -7,7 +7,7 @@ class Login_auth_property
 	private String DB_User;																	//← 接続用ユーザ名
 	private String DB_Password;																//← 接続用パスワード
 
-	public Login_auth_property()
+	Login_auth_property()
 	{
 		DB_Driver = "com.mysql.cj.jdbc.Driver";												//← 接続用ドライバー
 		DB_Url = "jdbc:mysql://localhost:3306/RESOURCE_MANAGEMENT?serverTimezone=JST";		//← 接続先URL

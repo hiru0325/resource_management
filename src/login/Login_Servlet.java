@@ -59,7 +59,6 @@ public class Login_Servlet
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
-		System.out.println("Return_Code:" + Return_Code);
 
 		return Return_Code;
 	}
