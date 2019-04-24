@@ -1,8 +1,9 @@
-<%@page import="members.Return_Servlet"%>
+<%@page import="login.Return_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="login.Login_Servlet" %>
 <%@ page import="info.Auth_Info" %>
+<%@ page import="java.sql.SQLException" %>
 <%
 
 	String Send_flg = "";					//← 画面遷移フラグ
@@ -30,31 +31,90 @@
 	if(Send_flg != null && Send_flg.equals("Login"))
 	{
 		int Return_Code = 0;
+		//↓　自動ログインフラグ取得
+		String Auto_flg = (String)Session.getAttribute("Auto_flg");
 		//↓インスタンス化
 		Login_Servlet Login_Servlet = new Login_Servlet();
 
 		//↓ ログ表示
 		log("「" + Session.getId() + "」がログイン処理を開始しました。");
 		//↓ ログイン認証処理
-		Return_Code = Login_Servlet.Authentication(request, response);
 
-		if(Return_Code == 0)
+		try
 		{
-			// ログイン認証成功
-
-			//↓ ログ表示
-			log("「" + Session.getId() + "」がログイン処理で正常終了しました。");
-			//送信区分を変更し、ユーザID取得
-			Send_flg = "Once";
-		}
-		else
-		{
-			if(Return_Code == 9)
+			//↓ 自動ログインフラグの確認
+			if(Auto_flg != null && Auto_flg.equals("true"))
 			{
+				//↓ クライアント側のログイントークンを取得
+				Cookie cookie[] = request.getCookies();
+				//↓　自動ログイン認証
+				Return_Code = Login_Servlet.Auto_Login(cookie, response);
+			}
+			else
+			{
+				String User_ID = request.getParameter("user_id");						//← 取得ユーザID
+				String User_Password = request.getParameter("user_pw");					//← リクエストユーザパスワード
+				String Auto_Login_Check = request.getParameter("Auto_Login_Check"); 	//← 自動ログインチェックボックス値
+				//↓ 手動ログイン認証
+				Return_Code = Login_Servlet.Input_Login(User_ID, User_Password, Auto_Login_Check, Session, response);
+			}
+		}
+		catch (SQLException e)
+		{
+			log(e.getStackTrace().toString());
+
+			//↓ セッションへエラーコード設定
+			Session.setAttribute("Error_Code", 1);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+
+		}
+		catch (ClassNotFoundException e)
+		{
+			log(e.getStackTrace().toString());
+
+			//↓ セッションへエラーコード設定
+			Session.setAttribute("Error_Code", 1);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+
+		switch(Return_Code)
+		{
+			case 0:
+				// ログイン認証成功
+				log("「" + Session.getId() + "」がログイン処理で正常終了しました。");
+				//送信区分を変更し、ユーザID取得
+				Send_flg = "Once";
+				break;
+
+			case 8:
+				// 自動ログイン認証失敗
+				log("「" + Session.getId() + "」が自動ログイン処理で認証失敗しました。");
+
+				//↓ 自動ログインをオフにする(一応、変えておく。。。)
+				Session.setAttribute("Auto_flg", "false");
+
+				//↓ セッション破棄(セッションハイジャック対策)
+				Session.invalidate();
+				//↓ 新規セッションを開始
+				Session = request.getSession();
+
+				//↓ 認証失敗ではない為、エラーフラグはfalse
+				Session.setAttribute("Alert_flg", "false");
+				response.sendRedirect("Main_Menu.jsp");
+
+				return;
+
+			case 9:
 				// 手動ログイン認証失敗
-
 				log("「" + Session.getId() + "」が手動ログイン処理で認証失敗しました。");
-
 				//↓ セッション破棄(セッションハイジャック対策)
 				Session.invalidate();
 				//↓ 新規セッションを開始
@@ -65,68 +125,59 @@
 				response.sendRedirect("Main_Menu.jsp");
 
 				return;
-			}
-			else
-			{
-				if(Return_Code == 8)
-				{
-					// 自動ログイン認証失敗
 
-					//↓ ログ表示
-					log("「" + Session.getId() + "」が自動ログイン処理で認証失敗しました。");
+			default :
+				// 処理異常終了
+				log("「" + Session.getId() + "」がログイン処理にて異常終了しました。");
 
-					//↓ 自動ログインをオフにする(一応、変えておく。。。)
-					Session.setAttribute("Auto_flg", "false");
+				//↓ セッションへエラーコード設定
+				Session.setAttribute("Error_Code", Return_Code);
+				//↓ 異常終了画面遷移
+				RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+				Error_Dispatch.forward(request, response);
 
-					//↓ セッション破棄(セッションハイジャック対策)
-					Session.invalidate();
-					//↓ 新規セッションを開始
-					Session = request.getSession();
-
-					//↓ 認証失敗ではない為、エラーフラグはfalse
-					Session.setAttribute("Alert_flg", "false");
-					response.sendRedirect("Main_Menu.jsp");
-
-					return;
-				}
-				else
-				{
-					// 処理異常終了
-
-					//↓ ログ表示
-					log("「" + Session.getId() + "」がログイン処理にて異常終了しました。");
-
-					//↓ セッションへエラーコード設定
-					Session.setAttribute("Error_Code", Return_Code);
-					//↓ 異常終了画面遷移
-					RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-					Error_Dispatch.forward(request, response);
-
-					return;
-				}
-			}
+				return;
 		}
 	}
 
 	//↓ 戻りページ処理
 	if(Send_flg != null && Send_flg.equals("Once"))
 	{
-		Auth_Info Auth_Info = null;											//← 認証結果情報
 		//↓ Return_Servlet インスタンス化
 		Return_Servlet Return_Servlet = new Return_Servlet();
 
+		try
+		{
 		//↓ ログイン情報取得処理
-		Auth_Info = Return_Servlet.Select_Info(request, response);
-
-		if(Auth_Info.getResult_Content().equals("true"))
-		{
-			//↓ ユーザ名取得
-			Login_User = Auth_Info.getLogin_User();
+		 Login_User = Return_Servlet.Select_Info(request, response);
 		}
-		else
+		catch(SQLException e)
 		{
-			//↓ セッションへエラーコード設定
-			Session.setAttribute("Error_Code", Auth_Info.getError_Code());
+			log(e.getStackTrace().toString());
+			//↓ セッションへエラーコード設定(ログイン情報取得エラー)
+			Session.setAttribute("Error_Code", 7);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+		catch(ClassNotFoundException e)
+		{
+			log(e.getStackTrace().toString());
+			//↓ セッションへエラーコード設定(その他エラー)
+			Session.setAttribute("Error_Code", 9);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+
+		if(Login_User == null && Login_User.isEmpty() )
+		{
+			//↓ セッションへエラーコード設定(ログイン情報取得エラー)
+			Session.setAttribute("Error_Code", 7);
 			//↓ 異常終了画面遷移
 			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
 			Error_Dispatch.forward(request, response);
