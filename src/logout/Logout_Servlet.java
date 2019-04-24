@@ -1,8 +1,7 @@
-package members;
+package logout;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
@@ -39,7 +38,6 @@ public class Logout_Servlet extends HttpServlet {
 
 		String Auto_flg = "";				//← 自動ログインフラグ
 		Connection connection = null;		//← DB接続情報
-		ResultSet rset = null;				//← SQL実行結果
 		int sResult = 0;					//← SQL実行結果
 		HttpSession Session = null;			//← セッション情報
 
@@ -74,65 +72,41 @@ public class Logout_Servlet extends HttpServlet {
 			}
 		}
 
+		//↓ Database_Utilインスタンス化
+		Database_Util Database_Util = new Database_Util();
+		//↓ Logout_util インスタンス化
+		Logout_util logout_util = new Logout_util();
 		//↓ DB接続
 		connection = Database_Util.DB_Connection();
 
-		//↓ セッションID検索処理
-		rset = Database_Util.Search_Session(connection, Session.getId());
-
 		try
 		{
-			rset.last();
-			if(rset.getRow() >= 1)
+			//↓ セッションID削除処理
+			sResult = logout_util.Delete_Session(connection, Session.getId());
+
+			//↓ SQL実行結果確認
+			if(sResult >= 1)
 			{
-				// 既存のセッションが登録されている場合、ログイン情報を削除
+				//SQL実行正常終了
 
-				//↓ セッションID削除処理
-				sResult = Database_Util.Delete_Session(connection, Session.getId());
-
-				//↓ SQL実行結果確認
-				if(sResult == 1)
-				{
-					//SQL実行正常終了
-
-					//↓ DB結果反映
-					connection.commit();
-				}
-				else
-				{
-					//SQL実行異常終了
-
-					//DB結果ロールバック
-					connection.rollback();
-
-					//↓ ログ表示
-					log("「" + Session.getId() + "」によるログアウト処理時、ログイン情報DB削除処理が異常終了しました。SQL実行結果【sResult=" + sResult + "】");
-
-					//↓ エラーコード設定(5:ログアウト処理時のログイントークン削除DBエラー)
-					request.setAttribute("Error_Code", 5);
-
-					//↓ 異常終了画面遷移
-					RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-					dispatch.forward(request, response);
-				}
+				//↓ DB結果反映
+				connection.commit();
 			}
 
-			//↓ DB切断
-			connection.close();
+				//↓ DB切断
+				connection.close();
 		}
 		catch(SQLException e)
 		{
-			//↓ ログ表示
-			log("「" + Session.getId() + "」によるログアウト処理時にてSQL実行エラーが発生しました。");
-			log("「" + Session.getId() + "」:" + e.getStackTrace());
+			log(e.getStackTrace().toString());
 
-			//↓ エラーコード設定(6:ログアウト処理想定外エラー)
-			request.setAttribute("Error_Code", 6);
-
+			//↓ セッションへエラーコード設定
+			Session.setAttribute("Error_Code", 5);
 			//↓ 異常終了画面遷移
-			RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-			dispatch.forward(request, response);
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
 		}
+
 
 		//↓ ログ表示
 		log("「" + Session.getId() + "」によるログアウト処理が正常終了しました。");

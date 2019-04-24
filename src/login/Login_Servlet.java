@@ -1,13 +1,11 @@
 package login;
 
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -16,66 +14,23 @@ import util.Database_Util;
 
 public class Login_Servlet
 {
-	public int Authentication(HttpServletRequest request, HttpServletResponse response)
-	{
-		response.setContentType("text/html; charset=UTF-8");
-
-		String Auto_flg = "";					//← 自動ログインフラグ
-		HttpSession Session = null;				//← ログイン情報
-		int Return_Code = 0;
-
-		//↓ セッション情報取得
-		Session = request.getSession();
-
-		//↓　自動ログインフラグ取得
-		Auto_flg = (String)Session.getAttribute("Auto_flg");
-
-		try
-		{
-			//↓ 自動ログインフラグの確認
-			if(Auto_flg != null && Auto_flg.equals("true"))
-			{
-				//↓ クライアント側のログイントークンを取得
-				Cookie cookie[] = request.getCookies();
-				//↓　自動ログイン認証
-				Return_Code = Auto_Login(cookie, response);
-			}
-			else
-			{
-				String User_ID = request.getParameter("user_id");						//← 取得ユーザID
-				String User_Password = request.getParameter("user_pw");					//← リクエストユーザパスワード
-				String Auto_Login_Check = request.getParameter("Auto_Login_Check"); 	//← 自動ログインチェックボックス値
-				//↓ 手動ログイン認証
-				Return_Code = Input_Login(User_ID, User_Password, Auto_Login_Check, Session, response);
-			}
-		}
-		catch (SQLException e)
-		{
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-		catch (ClassNotFoundException e)
-		{
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-
-		return Return_Code;
-	}
-
 	//↓ 手動ログイン
-	private int Input_Login(String User_ID, String User_Password, String Auto_Login_Check, HttpSession Session, HttpServletResponse response)
+	public int Input_Login(String User_ID, String User_Password, String Auto_Login_Check, HttpSession Session, HttpServletResponse response)
 			throws SQLException, ClassNotFoundException
 	{
 		String login_user = "";			//← DBで取得したユーザ名
 		String Login_Password = "";		//← DBより取得したパスワード
 		Connection connection = null;	//← DB接続情報
 
+		//↓ Database_Utilインスタンス化
+		Database_Util Database_Util = new Database_Util();
 		//↓ login_utilインスタンス化
 		Login_auth_util login_util = new Login_auth_util();
 
+
+
 		//↓ データベース接続処理
-		connection = login_util.Connection();
+		connection = Database_Util.DB_Connection();
 
 		//↓ ユーザ検索処理
 		Login_Password = login_util.Search_User(connection, User_ID);
@@ -95,7 +50,7 @@ public class Login_Servlet
 			int sResult = 0;					//← SQL登録実行結果
 
 			//↓ 既存のセッションが登録されている場合、ログイン情報を削除(戻しボタン対策)
-			sResult = Database_Util.Delete_Session(connection, Session.getId());
+			sResult = login_util.Delete_Session(connection, Session.getId());
 			//↓　存在した場合、コミット
 			if(sResult >= 1)
 				connection.commit();
@@ -183,7 +138,7 @@ public class Login_Servlet
 	}
 
 	//↓ 自動ログイン
-	private int Auto_Login(Cookie cookie[], HttpServletResponse response)
+	public int Auto_Login(Cookie cookie[], HttpServletResponse response)
 			throws SQLException, ClassNotFoundException
 	{
 		String User_Token = "";			//← ログイントークン
@@ -217,8 +172,10 @@ public class Login_Servlet
 
 		Connection connection = null;	//← DB接続
 
+		//↓ Database_Utilインスタンス化
+		Database_Util Database_Util = new Database_Util();
 		//↓ データベース接続処理
-		connection = login_util.Connection();
+		connection = Database_Util.DB_Connection();
 
 		//↓ ログイントークン検索処理
 		Expiration_Date = login_util.Search_Token(connection, User_Token);
@@ -250,7 +207,7 @@ public class Login_Servlet
 			response.addCookie(Delete_Token);
 
 			//↓ DBから有効期限切れログイントークンを削除
-			sResult = Database_Util.Delete_Token(connection, User_Token);
+			sResult = login_util.Delete_Token(connection, User_Token);
 
 			//↓DB削除処理結果確認
 			if(sResult >= 1)

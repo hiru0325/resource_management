@@ -54,6 +54,9 @@ public class Select_Resource extends HttpServlet {
 			PreparedStatement pStmt = null;
 			ResultSet rset = null;
 
+			//↓ Database_Utilインスタンス化
+			Database_Util Database_Util = new Database_Util();
+
 			//↓ データベース接続処理
 			connection = Database_Util.DB_Connection();
 

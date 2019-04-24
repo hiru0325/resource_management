@@ -1,9 +1,10 @@
-package members;
+package logout;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -44,39 +45,29 @@ public class Session_Out extends HttpServlet {
 		//↓ 自動ログインフラグ取得
 		Auto_flg = (String)Session.getAttribute("Auto_flg");
 
+		//↓ Logout_util インスタンス化
+		Logout_util logout_util = new Logout_util();
+
 		//↓ 自動ログインフラグ内容確認
 		if(!(Auto_flg != null && Auto_flg.equals("true")))
 		{
 			//　自動ログインがオフの場合、セッション破棄
 
+			//↓ Database_Utilインスタンス化
+			Database_Util Database_Util = new Database_Util();
 			//↓ DB接続
 			connection = Database_Util.DB_Connection();
 
-			//↓ ログイントークン削除処理
-			sResult = Database_Util.Delete_Session(connection, Session.getId());
-
 			try
 			{
-				//↓ SQL実行結果確認
-				if(sResult == 1)
-				{
-					//SQL実行正常終了
+				//↓ ログイントークン削除処理
+				sResult = logout_util.Delete_Session(connection, Session.getId());
 
+				//↓ SQL実行結果確認
+				if(sResult >= 1)
+				{
 					//↓ DB結果反映
 					connection.commit();
-				}
-				else
-				{
-					if(sResult != 0)
-					{
-						//SQL実行異常終了
-
-						//DB結果ロールバック
-						connection.rollback();
-
-						//↓ ログ表示
-						log("ログイントークン「" + Session.getId() + "」によるログアウト処理時、ログイン情報DB削除処理が異常終了しました。SQL実行結果【sResult=" + sResult + "】");
-					}
 				}
 				//↓ DB切断
 				connection.close();
@@ -86,6 +77,12 @@ public class Session_Out extends HttpServlet {
 				//↓ ログ表示
 				log("ログイントークン「" + Session.getId() + "」によるログアウト処理時にてSQL実行エラーが発生しました。");
 				log("「" + Session.getId() + "」:" + e.getStackTrace());
+
+				//↓ セッションへエラーコード設定
+				Session.setAttribute("Error_Code", 5);
+				//↓ 異常終了画面遷移
+				RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+				Error_Dispatch.forward(request, response);
 			}
 
 			//↓ ログ表示

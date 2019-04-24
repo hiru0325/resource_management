@@ -21,6 +21,8 @@ public class Change_Servlet
 		Connection connection = null;		//← DB接続情報格納変数
 		ResultSet rset = null;				//← SQL実行結果格納変数
 
+		//↓ Database_Utilインスタンス化
+		Database_Util Database_Util = new Database_Util();
 		//↓ Auth_Info インスタンス化
 		Auth_Info = new Auth_Info();
 

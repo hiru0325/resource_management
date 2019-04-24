@@ -1,13 +1,13 @@
 package login;
 
-class Login_auth_property
+public class Login_auth_property
 {
 	private String DB_Driver;																//← 接続用ドライバー
 	private String DB_Url;																	//← 接続先URL
 	private String DB_User;																	//← 接続用ユーザ名
 	private String DB_Password;																//← 接続用パスワード
 
-	Login_auth_property()
+	public Login_auth_property()
 	{
 		DB_Driver = "com.mysql.cj.jdbc.Driver";												//← 接続用ドライバー
 		DB_Url = "jdbc:mysql://localhost:3306/RESOURCE_MANAGEMENT?serverTimezone=JST";		//← 接続先URL
@@ -16,7 +16,7 @@ class Login_auth_property
 	}
 
 	//↓ 接続用ドライバー(ゲッター)
-	String get_DB_Driver()
+	public String get_DB_Driver()
 	{
 		return DB_Driver;
 	}
@@ -28,7 +28,7 @@ class Login_auth_property
 	}
 
 	//↓ 接続URL(ゲッター)
-	String get_DB_Url()
+	public String get_DB_Url()
 	{
 		return DB_Url;
 	}
@@ -40,7 +40,7 @@ class Login_auth_property
 	}
 
 	//↓　接続用ユーザ名(ゲッター)
-	String get_DB_User()
+	public String get_DB_User()
 	{
 		return DB_User;
 	}
@@ -52,7 +52,7 @@ class Login_auth_property
 	}
 
 	//↓　接続用パスワード(ゲッター)
-	String get_DB_Password()
+	public String get_DB_Password()
 	{
 		return DB_Password;
 	}
