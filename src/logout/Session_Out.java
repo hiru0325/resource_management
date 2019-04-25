@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import util.Database_Util;
+import util.Database_util;
 
 /**
  * Servlet implementation class sample
@@ -53,13 +53,11 @@ public class Session_Out extends HttpServlet {
 		{
 			//　自動ログインがオフの場合、セッション破棄
 
-			//↓ Database_Utilインスタンス化
-			Database_Util Database_Util = new Database_Util();
-			//↓ DB接続
-			connection = Database_Util.DB_Connection();
-
 			try
 			{
+				//↓ DB接続
+				connection = Database_util.DB_Connection();
+
 				//↓ ログイントークン削除処理
 				sResult = logout_util.Delete_Session(connection, Session.getId());
 
@@ -80,6 +78,16 @@ public class Session_Out extends HttpServlet {
 
 				//↓ セッションへエラーコード設定
 				Session.setAttribute("Error_Code", 5);
+				//↓ 異常終了画面遷移
+				RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+				Error_Dispatch.forward(request, response);
+			}
+			catch (ClassNotFoundException e)
+			{
+				log("「" + Session.getId() + "」:" + e.getStackTrace());
+
+				//↓ セッションへエラーコード設定
+				Session.setAttribute("Error_Code", 9);
 				//↓ 異常終了画面遷移
 				RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
 				Error_Dispatch.forward(request, response);

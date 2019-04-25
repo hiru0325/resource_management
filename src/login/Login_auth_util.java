@@ -33,7 +33,7 @@ public class Login_auth_util
 			if(rset.getRow() > 1)
 			{
 				//↓ 該当情報が2件以上存在する場合、DBエラー
-				new SQLException();
+				throw new SQLException();
 			}
 		}
 
@@ -161,7 +161,7 @@ public class Login_auth_util
 			if(rset.getRow() > 1)
 			{
 				//↓ 該当情報が2件以上存在する場合、DBエラー
-				new SQLException();
+				throw new SQLException();
 			}
 		}
 
@@ -194,7 +194,7 @@ public class Login_auth_util
 		if(rset.getRow() > 1)
 		{
 			//↓ 取得失敗(処理異常終了)
-			new SQLException();
+			throw new SQLException();
 		}
 
 		//↓ ユーザ名取得

@@ -1,7 +1,6 @@
 package resources;
 
-import info.Resrc_Select_Info;
-import util.Database_Util;
+import util.Database_util;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -54,11 +53,8 @@ public class Select_Resource extends HttpServlet {
 			PreparedStatement pStmt = null;
 			ResultSet rset = null;
 
-			//↓ Database_Utilインスタンス化
-			Database_Util Database_Util = new Database_Util();
-
 			//↓ データベース接続処理
-			connection = Database_Util.DB_Connection();
+			connection = Database_util.DB_Connection();
 
 			//↓ リソース内容を取得
 			sQuery = "SELECT "
@@ -124,6 +120,10 @@ public class Select_Resource extends HttpServlet {
 			e.printStackTrace();
 		}
 		//statement = connection.createStatement();
+ catch (ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
 
 	}
 }

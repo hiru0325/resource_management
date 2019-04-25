@@ -15,7 +15,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class Cipher_Util
+public class Cipher_util
 {
 	/*
 	 * 暗号化アルゴリズム ： 「AES」
@@ -156,7 +156,7 @@ public class Cipher_Util
 		return encodedText.equals(encodedFromPlain);
 	}
 
-	///*
+	/*
 	//↓ 文字列暗号化用メイン関数
 	public static void main(String[] args)
 	{
@@ -168,5 +168,5 @@ public class Cipher_Util
 		//↓ 暗号化前 ： 「暗号化後」
 		System.out.println(plainText + ":" + "「" + encryptText + "」");
 	}
-	//*/
+	*/
 }

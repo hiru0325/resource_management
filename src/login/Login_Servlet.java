@@ -9,8 +9,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import util.Cipher_Util;
-import util.Database_Util;
+import util.Cipher_util;
+import static util.Database_util.DB_Connection;
 
 public class Login_Servlet
 {
@@ -22,15 +22,11 @@ public class Login_Servlet
 		String Login_Password = "";		//← DBより取得したパスワード
 		Connection connection = null;	//← DB接続情報
 
-		//↓ Database_Utilインスタンス化
-		Database_Util Database_Util = new Database_Util();
 		//↓ login_utilインスタンス化
 		Login_auth_util login_util = new Login_auth_util();
 
-
-
 		//↓ データベース接続処理
-		connection = Database_Util.DB_Connection();
+		connection = DB_Connection();
 
 		//↓ ユーザ検索処理
 		Login_Password = login_util.Search_User(connection, User_ID);
@@ -41,7 +37,7 @@ public class Login_Servlet
 			return 9;
 
 		//↓ パスワードの比較
-		if(Cipher_Util.passcheck(User_Password, Login_Password))
+		if(Cipher_util.passcheck(User_Password, Login_Password))
 		{
 			//↓ ログイン情報を保持(自動ログイン関係なく、ログイントークンを利用して情報管理していく)
 			String User_Token = "";
@@ -51,6 +47,7 @@ public class Login_Servlet
 
 			//↓ 既存のセッションが登録されている場合、ログイン情報を削除(戻しボタン対策)
 			sResult = login_util.Delete_Session(connection, Session.getId());
+
 			//↓　存在した場合、コミット
 			if(sResult >= 1)
 				connection.commit();
@@ -61,7 +58,7 @@ public class Login_Servlet
 				final String datePattern = "yyyy/MM/dd HH:mm:ss";
 
 				//↓ ユーザIDを基にログイントークンを作成
-				User_Token = Cipher_Util.encode(login_user);
+				User_Token = Cipher_util.encode(login_user);
 
 				//↓ 現在の日時の取得
 				Current_Time = new Date();
@@ -172,10 +169,8 @@ public class Login_Servlet
 
 		Connection connection = null;	//← DB接続
 
-		//↓ Database_Utilインスタンス化
-		Database_Util Database_Util = new Database_Util();
 		//↓ データベース接続処理
-		connection = Database_Util.DB_Connection();
+		connection = DB_Connection();
 
 		//↓ ログイントークン検索処理
 		Expiration_Date = login_util.Search_Token(connection, User_Token);

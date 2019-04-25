@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import util.Database_Util;
+import util.Database_util;
 
 /**
  * Servlet implementation class Logout
@@ -72,15 +72,14 @@ public class Logout_Servlet extends HttpServlet {
 			}
 		}
 
-		//↓ Database_Utilインスタンス化
-		Database_Util Database_Util = new Database_Util();
 		//↓ Logout_util インスタンス化
 		Logout_util logout_util = new Logout_util();
-		//↓ DB接続
-		connection = Database_Util.DB_Connection();
 
 		try
 		{
+			//↓ DB接続
+			connection = Database_util.DB_Connection();
+
 			//↓ セッションID削除処理
 			sResult = logout_util.Delete_Session(connection, Session.getId());
 
@@ -102,6 +101,16 @@ public class Logout_Servlet extends HttpServlet {
 
 			//↓ セッションへエラーコード設定
 			Session.setAttribute("Error_Code", 5);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+		}
+		catch (ClassNotFoundException e)
+		{
+			log(e.getStackTrace().toString());
+
+			//↓ セッションへエラーコード設定
+			Session.setAttribute("Error_Code", 9);
 			//↓ 異常終了画面遷移
 			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
 			Error_Dispatch.forward(request, response);

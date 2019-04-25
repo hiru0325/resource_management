@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import util.Database_Util;
+import util.Database_util;
 
 public class Return_Servlet
 {
@@ -20,13 +20,11 @@ public class Return_Servlet
 		//↓ セッション情報取得
 		Session = request.getSession();
 
-		//Database_Util インスタンス化
-		Database_Util Database_Util = new Database_Util();
 		//↓Login_auth_util インスタンス化
 		Login_auth_util login_util = new Login_auth_util();
 
 		//↓　該当セッションのユーザ名を取得
-		connection = Database_Util.DB_Connection();
+		connection = Database_util.DB_Connection();
 
 		//↓ セッション検索処理
 		User_name = login_util.Search_Session(connection, Session.getId());

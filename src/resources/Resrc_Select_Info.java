@@ -1,4 +1,4 @@
-package info;
+package resources;
 
 public class Resrc_Select_Info
 {

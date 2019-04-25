@@ -1,6 +1,6 @@
 package util;
 
-public class Escape_Util
+public class Escape_util
 {
 	//↓ ユーザによる入力値のサニタイジング(XSS(クロスサイトスクリプティング)対策)
 	public static String Escape_Html(String InputText)
