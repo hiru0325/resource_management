@@ -49,6 +49,22 @@
     <script src="../js/bootstrap-4.1.3-js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../js/Window_Common.js"></script>
 	<title>ログイン画面</title>
+	<style>
+	<!--
+	body
+	{
+		padding-top: 70px;
+	}
+	.navbar-brand
+	{
+		font-size: 24px;
+	}
+	.form-group
+	{
+		margin-bottom: 5px;
+	}
+	-->
+	</style>
 </head>
 <body>
 	<!-- ↓ javascript処理 -->
@@ -139,31 +155,39 @@
 	</script>
 	<!-- ↑ javascript処理 -->
 <div class="container">
-	<h3>ログイン画面</h3>
-	 <form class="form-horizontal" name="Login_Form" method="post">
-	 	<div class="form-group">
-			<label for="user_id" class="col-sm-2 control-label">User ID</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
+	<div class="row">
+		<div class="col-lg-3"></div>
+		<div class="col-lg-6">
+			<div class="form-wrap">
+				<div class="text-center"><h3>ログイン画面</h3></div>
+				<form role="form" name="Login_Form" method="post">
+				 	<div class="form-group">
+						<label for="user_id" class="col-sm-2 control-label">User ID</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
+						</div>
+					</div>
+					 <div class="form-group">
+						<label for="user_pw" class="col-sm-2 control-label">Password</label>
+						<div class="col-sm-10">
+							<input type="password" class="form-control" id="user_pw" placeholder="Password" name="user_pw" value=""/>
+						</div>
+					</div>
+					<div class="form-group">
+						<!-- オートログインのチェックボックス -->
+						<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">Remember me</label>
+					</div>
+					<div class="text-center">
+						<!-- ログインボタン -->
+						<input type="button" name="Login_Button" value="Sign in" onclick="Send_Function()" >
+						<!-- リセットボタン -->
+						<input type="reset" name="Clear_Button" value="Reset"  />
+					</div>
+				</form>
 			</div>
 		</div>
-		 <div class="form-group">
-			<label for="user_pw" class="col-sm-2 control-label">Password</label>
-			<div class="col-sm-10">
-				<input type="password" class="form-control" id="user_pw" placeholder="Password" name="user_pw" value=""/>
-			</div>
-		</div>
-		<div class="form-group">
-			<!-- オートログインのチェックボックス -->
-			<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">Remember me</label>
-		</div>
-		<div class="form-group">
-			<!-- ログインボタン -->
-			<input type="button" name="Login_Button" value="Sign in" onclick="Send_Function()" >
-			<!-- リセットボタン -->
-			<input type="reset" name="Clear_Button" value="Reset"  />
-		</div>
-	</form>
+		<div class="col-lg-3"></div>
+	</div>
 </div>
 </body>
 </html>
