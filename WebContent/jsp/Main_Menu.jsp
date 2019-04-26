@@ -2,8 +2,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="login.Login_Servlet" %>
-<%@ page import="info.Auth_Info" %>
 <%@ page import="java.sql.SQLException" %>
+<%@ page import="members.Change_Pass_Servlet" %>
 <%
 
 	String Send_flg = "";					//← 画面遷移フラグ
@@ -189,10 +189,83 @@
 	//↓パスワード変更処理
 	if(Send_flg != null && Send_flg.equals("Change_Password"))
 	{
-		RequestDispatcher Change_Passeword_dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
-		Change_Passeword_dispatch.forward(request, response);
+		RequestDispatcher Change_Password_dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
+		Change_Password_dispatch.forward(request, response);
 
 		return;
+	}
+
+	//↓ パスワード変更処理
+	if(Send_flg != null && Send_flg.equals("Change"))
+	{
+		int Return_Code = 0;				//← 返り値
+		String Before_pw = "";
+		String After_pw = "";
+
+		Change_Pass_Servlet Change_Pass_Servlet = new Change_Pass_Servlet();
+
+		//↓ 現パスワードをリクエストボディ部から受信
+		Before_pw = request.getParameter("Before_pw");
+		//↓ 新パスワードをリクエストボディ部から受信
+		After_pw = request.getParameter("After_pw");
+
+		try
+		{
+			//↓ パスワード変更処理
+			Return_Code = Change_Pass_Servlet.Change_Password(Session, Before_pw, After_pw);
+		}
+		catch(SQLException e)
+		{
+			log(e.getStackTrace().toString());
+			//↓ セッションへエラーコード設定(ログイン情報取得エラー)
+			Session.setAttribute("Error_Code", 7);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+		catch(ClassNotFoundException e)
+		{
+			log(e.getStackTrace().toString());
+			//↓ セッションへエラーコード設定(その他エラー)
+			Session.setAttribute("Error_Code", 9);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+
+			return;
+		}
+
+		switch(Return_Code)
+		{
+			case 0:
+				Session.setAttribute("Alert_flg", "Accept");
+				RequestDispatcher Accept_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
+				Accept_Dispatch.forward(request, response);
+				return;
+
+			case 9:
+				//↓ パスワード認証失敗
+				log("「" + Session.getId() + "」がパスワード更新処理で認証失敗しました。");
+
+				//↓ 認証失敗エラーフラグをFailedにし、ログイン画面へリダイレクト
+				Session.setAttribute("Alert_flg", "Failed");
+				RequestDispatcher Failed_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
+				Failed_Dispatch.forward(request, response);
+
+				return;
+
+			default:
+				log("「" + Session.getId() + "」がパスワード更新処理で異常終了しました。");
+				//↓ セッションへエラーコード設定
+				Session.setAttribute("Error_Code", Return_Code);
+				//↓ 異常終了画面遷移
+				RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+				Error_Dispatch.forward(request, response);
+
+				return;
+		}
 	}
 
 	//↓ログアウト処理
@@ -211,10 +284,16 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="../css/Menu.css" />
+	<!-- BootstrapのCSS読み込み -->
+    <link href="../css/bootstrap-4.1.3-css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery読み込み -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- BootstrapのJS読み込み -->
+    <script src="../js/bootstrap-4.1.3-js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/Window_Common.js"></script>
 <title>メインメニュー画面</title>
 </head>
 <body>
-	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
 
 	var Alive_flg;		//← セッション破棄回避フラグ

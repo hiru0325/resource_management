@@ -40,12 +40,18 @@
 <html>
 <head>
 	<meta charset="UTF-8">
+	<!-- BootstrapのCSS読み込み -->
 	<link rel="stylesheet" type="text/css" href="../css/IO_Disp.css" />
+    <link href="../css/bootstrap-4.1.3-css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery読み込み -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <!-- BootstrapのJS読み込み -->
+    <script src="../js/bootstrap-4.1.3-js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/Window_Common.js"></script>
 	<title>ログイン画面</title>
 </head>
 <body>
 	<!-- ↓ javascript処理 -->
-	<script type="text/javascript" src="../js/Window_Common.js"></script>
 	<script type="text/javascript">
 
 		var Alive_flg;						//← 画面遷移フラグ
@@ -132,29 +138,32 @@
 		}
 	</script>
 	<!-- ↑ javascript処理 -->
-
-	<div id="disp" class="parent">
-		<div class="inner">
-			<h3>ログイン画面</h3>
-			<br>
-			 <form name="Login_Form" method="post">
-				<p>ユーザID</p>
-				<input type="text" id="user_id" name="user_id" value="" />
-				<p>パスワード</p>
-				<input type="password" id="user_pw" name="user_pw" value="" />
-				<br>
-				<br>
-				<!-- オートログインのチェックボックス -->
-				<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">自動ログインを設定する</label>
-				<br>
-				<br>
-				<br>
-				<!-- ログインボタン -->
-				<input type="button" name="Login_Button" value="ログイン" onclick="Send_Function()" >
-				<!-- リセットボタン -->
-				<input type="reset" name="Clear_Button" value="リセット"  />
-			</form>
+<div class="container">
+	<h3>ログイン画面</h3>
+	 <form class="form-horizontal" name="Login_Form" method="post">
+	 	<div class="form-group">
+			<label for="user_id" class="col-sm-2 control-label">User ID</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
+			</div>
 		</div>
-	</div>
+		 <div class="form-group">
+			<label for="user_pw" class="col-sm-2 control-label">Password</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" id="user_pw" placeholder="Password" name="user_pw" value=""/>
+			</div>
+		</div>
+		<div class="form-group">
+			<!-- オートログインのチェックボックス -->
+			<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">Remember me</label>
+		</div>
+		<div class="form-group">
+			<!-- ログインボタン -->
+			<input type="button" name="Login_Button" value="Sign in" onclick="Send_Function()" >
+			<!-- リセットボタン -->
+			<input type="reset" name="Clear_Button" value="Reset"  />
+		</div>
+	</form>
+</div>
 </body>
 </html>
