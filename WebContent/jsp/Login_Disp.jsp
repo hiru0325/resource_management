@@ -162,7 +162,7 @@
 				<div class="text-center"><h3>ログイン画面</h3></div>
 				<form role="form" name="Login_Form" method="post">
 				 	<div class="form-group">
-						<label for="user_id" class="col-sm-2 control-label">User ID</label>
+						<label for="user_id" class="col-sm-2 control-label">User_ID</label>
 						<div class="col-sm-10">
 							<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
 						</div>

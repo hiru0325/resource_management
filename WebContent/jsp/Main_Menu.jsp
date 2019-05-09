@@ -1,3 +1,6 @@
+<%@page import="java.util.ArrayList"%>
+<%@page import="resources.Down_Resource"%>
+<%@page import="resources.Resrc_Select_Info"%>
 <%@page import="login.Return_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -186,7 +189,34 @@
 		}
 	}
 
-	//↓パスワード変更処理
+	//↓ ファイルダウンロード画面
+	if(Send_flg != null && Send_flg.equals("File_Download"))
+	{
+		int Return_Code = 0;
+		ArrayList<Resrc_Select_Info> Resource_Result = new ArrayList<Resrc_Select_Info>();
+
+		Down_Resource Down_Resource = new Down_Resource();
+
+		//↓ ダウンロードファイル照会
+		Return_Code = Down_Resource.Select_Resource(Resource_Result);
+
+		switch(Return_Code)
+		{
+			case 0 :
+						request.setAttribute("Resource_Result", Resource_Result);
+						//↓ 結果画面へ画面遷移
+						RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Resrc_Down_Disp.jsp");
+						dispatch.forward(request, response);
+						break;
+			default :
+
+		}
+
+
+		return;
+	}
+
+	//↓パスワード変更画面
 	if(Send_flg != null && Send_flg.equals("Change_Password"))
 	{
 		RequestDispatcher Change_Password_dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Change_Password_Disp.jsp");
@@ -304,6 +334,21 @@
 		Alive_flg = false;
 	};
 
+	//↓ ファイルダウンロード
+	function Send_File_Download()
+	{
+		//↓ 初期化
+		Alive_flg = true;
+		//↓ 画面遷移のフラグ設定
+		Send_flg = document.createElement('input');
+		Send_flg.setAttribute('type', 'hidden');
+		Send_flg.setAttribute('name', 'Send_flg');
+		Send_flg.setAttribute('value', 'File_Download');
+		document.Change_Password_Form.appendChild(Send_flg);
+		//↓ フォーム内容を送信
+		document.Change_Password_Form.submit();
+	}
+
 	//↓ パスワード変更処理
 	function Send_Change_Password()
 	{
@@ -341,9 +386,10 @@
 			<h3>メインメニュー画面</h3>
 			<br>
 			<p class="login_user">ようこそ、 <%= Login_User %> さん</p>
-			<!--
-			<button onclick="location.href='../jsp/Select_Resource'">ファイルダウンロード</button>
-			 -->
+			<br>
+ 			<form name="File_Download_Form" method="post">
+				<input type="button" name="File_Down_btn" onclick="Send_File_Download()" value="ファイルダウンロード" />
+			</form>
 			<br>
 			<br>
 			<form name="Change_Password_Form" method="post">

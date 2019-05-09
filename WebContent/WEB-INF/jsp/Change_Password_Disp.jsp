@@ -1,73 +1,17 @@
-<%@page import="members.Change_Servlet"%>
+<%@page import="members.Change_Pass_Servlet"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ page import="info.Auth_Info" %>
+<%@ page import="java.sql.SQLException" %>
 <%
-	String Send_flg = "";		//← 送信区分
-	String Alert_flg = "";		//← アラートフラグ
+	HttpSession Session = null;		//← セッション情報
+	String Alert_flg = "";					//← アラートフラグ
 
-	//↓ 送信区分取得
-	Send_flg = request.getParameter("Send_flg");
-
-	//↓ パスワード変更処理
-	if(Send_flg != null && Send_flg.equals("Change"))
-	{
-		HttpSession Session = null;
-		Auth_Info Auth_Info = null;
-		String Before_pw = "";
-		String After_pw = "";
-
-		//↓　セッション情報取得
-		Session = request.getSession();
-
-		Change_Servlet Change_Servlet = new Change_Servlet();
-
-		//↓ 現パスワードをリクエストボディ部から受信
-		Before_pw = request.getParameter("Before_pw");
-		//↓ 新パスワードをリクエストボディ部から受信
-		After_pw = request.getParameter("After_pw");
-
-		//↓ パスワード変更処理
-		Auth_Info = Change_Servlet.Change_Password(Session, Before_pw, After_pw);
-
-		if(Auth_Info.getResult_Content().equals("true"))
-		{
-			//↓ パスワード変更処理正常終了
-
-		}
-		else
-		{
-			if(Auth_Info.getResult_Content().equals("false"))
-			{
-				//↓ 現パスワード認証失敗
-				Alert_flg = "Failed";
-			}
-			else
-			{
-				if(Auth_Info.getResult_Content().equals("error"))
-				{
-					//  パスワード変更処理異常終了
-
-					//↓ セッションへエラーコード設定
-					Session.setAttribute("Error_Code", Auth_Info.getError_Code());
-					//↓ 異常終了画面遷移
-					RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
-					Error_Dispatch.forward(request, response);
-				}
-			}
-		}
-	}
-
-	//↓ メインメニューへ戻る
-	if(Send_flg != null && Send_flg.equals("Once"))
-	{
-		//↓ メインメニュー画面へ戻る
-		RequestDispatcher Once_dispatch = request.getRequestDispatcher("../jsp/Main_Menu.jsp");
-		Once_dispatch.forward(request, response);
-
-		return;
-	}
-
+	//↓ セッション情報格納
+	Session = request.getSession();
+	//↓ アラートフラグ取得
+	Alert_flg = (String)Session.getAttribute("Alert_flg");
+	//↓ アラートフラグをセッション上から消去
+	Session.removeAttribute("Alert_flg");
 %>
 <!DOCTYPE html>
 <html>
@@ -88,10 +32,20 @@
 			//↓ 初期化
 			Alive_flg = false;
 
-			//↓ 認証失敗時のアラートメッセージ
-			if("<%= Alert_flg %>" == "Failed")
+			//↓ 認証エラーフラグの確認
+			switch("<%= Alert_flg %>")
 			{
-				alert("認証に失敗しました。\nパスワードをご確認ください。");
+				case "Accept":
+					//↓ パスワード変更処理正常終了
+					alert("パスワード変更に成功しました。");
+					break;
+				case "Failed":
+					//↓ 認証エラーメッセージ表示
+					alert("パスワード認証に失敗しました。\n現在のパスワードをご確認ください。");
+					break;
+
+				default:
+					break;
 			}
 		};
 
@@ -116,26 +70,51 @@
 			//↓ セッション破棄回避フラグをtrueにしてonbeforeunload回避
 			Alive_flg = true;
 
+			//↓ 現在パスワード項目制御
+			var Before_pw = document.getElementById("Before_pw");
 			//↓ 新しいパスワード項目制御
 			var After_pw = document.getElementById("After_pw");
 			//↓ 確認パスワード項目制御
 			var Confirm_pw = document.getElementById("Confirm_pw");
 
-			//↓ 新パスワードと確認パスワードの比較
-			if(After_pw.value == Confirm_pw.value)
+
+			if(Before_pw.value.trim() == "")
 			{
-				var Send_flg = document.createElement('input');
-				Send_flg.setAttribute('type', 'hidden');
-				Send_flg.setAttribute('name', 'Send_flg');
-				Send_flg.setAttribute('value', 'Change');
-				document.Change_Password_Form.appendChild(Send_flg);
-				//↓ パスワード変更処理へ移行
-				document.Change_Password_Form.submit();
+				alert("「現在のパスワード」項目を入力してください。");
 			}
 			else
 			{
-				//↓ アラートメッセージ表示
-				alert("「新しいパスワード」と「新しいパスワード(確認)」の内容が不一致です。");
+				if(After_pw.value.trim() == "")
+				{
+					alert("「新しいパスワード」項目を入力してください。");
+				}
+				else
+				{
+					if(Confirm_pw.value.trim() == "")
+					{
+						alert("「新しいパスワード(確認)」項目を入力してください。");
+					}
+					else
+					{
+						//↓ 新パスワードと確認パスワードの比較
+						if(After_pw.value == Confirm_pw.value)
+						{
+							var Send_flg = document.createElement('input');
+							Send_flg.setAttribute('type', 'hidden');
+							Send_flg.setAttribute('name', 'Send_flg');
+							Send_flg.setAttribute('value', 'Change');
+							document.Change_Password_Form.appendChild(Send_flg);
+
+							//↓ パスワード変更処理へ移行
+							document.Change_Password_Form.submit();
+						}
+						else
+						{
+							//↓ アラートメッセージ表示
+							alert("「新しいパスワード」と「新しいパスワード(確認)」の内容が不一致です。");
+						}
+					}
+				}
 			}
 		}
 	</script>
@@ -155,11 +134,11 @@
 				<br>
 				<br>
 				<!-- パスワード変更ボタン -->
-				<input type="button" name="update" value="パスワード変更" onclick="Check_Password()" />
+				<input type="button" name="update" onclick="Check_Password()" value="パスワード変更"  />
 				<br>
 				<br>
-			</form>
-			<form name="Back_Form" method="post">
+				</form>
+				<form name="Back_Form" method="post">
 				<!-- 戻るボタン -->
 				<input type="button" name="back" onclick="Send_Login()" value="メインメニューへ戻る" />
 			</form>
