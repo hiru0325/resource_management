@@ -197,8 +197,29 @@
 
 		Down_Resource Down_Resource = new Down_Resource();
 
-		//↓ ダウンロードファイル照会
-		Return_Code = Down_Resource.Select_Resource(Resource_Result);
+		try
+		{
+			//↓ ダウンロードファイル照会
+			Return_Code = Down_Resource.Select_Resource(Resource_Result);
+		}
+		catch(SQLException e)
+		{
+			log(e.getStackTrace().toString());
+			//↓ SQLエラー
+			Session.setAttribute("Error_Code", 1);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+		}
+		catch(ClassNotFoundException e)
+		{
+			log(e.getStackTrace().toString());
+			//↓ セッションへエラーコード設定(その他エラー)
+			Session.setAttribute("Error_Code", 9);
+			//↓ 異常終了画面遷移
+			RequestDispatcher Error_Dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Error_Login_Disp.jsp");
+			Error_Dispatch.forward(request, response);
+		}
 
 		switch(Return_Code)
 		{
@@ -207,6 +228,10 @@
 						//↓ 結果画面へ画面遷移
 						RequestDispatcher dispatch = request.getRequestDispatcher("/WEB-INF/jsp/Resrc_Down_Disp.jsp");
 						dispatch.forward(request, response);
+						break;
+			case 1 :
+						//↓ ダウンロードファイルなし
+
 						break;
 			default :
 
