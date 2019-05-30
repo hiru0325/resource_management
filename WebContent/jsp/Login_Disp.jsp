@@ -154,39 +154,38 @@
 		}
 	</script>
 	<!-- ↑ javascript処理 -->
-<div class="container">
+<div id="disp" class="container">
 	<div class="row">
-		<div class="col-lg-3"></div>
-		<div class="col-lg-6">
+		<div class="col-md-4"></div>
+		<div class="col-md-4 bg-info">
+			<br>
 			<div class="form-wrap">
-				<div class="text-center"><h3>ログイン画面</h3></div>
+				<div class="text-center"><h3>Login</h3></div>
 				<form role="form" name="Login_Form" method="post">
 				 	<div class="form-group">
 						<label for="user_id" class="col-sm-2 control-label">User_ID</label>
-						<div class="col-sm-10">
-							<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
-						</div>
+						<input type="text" class="form-control" id="user_id" placeholder="User ID" name="user_id" value="" />
 					</div>
 					 <div class="form-group">
 						<label for="user_pw" class="col-sm-2 control-label">Password</label>
-						<div class="col-sm-10">
-							<input type="password" class="form-control" id="user_pw" placeholder="Password" name="user_pw" value=""/>
-						</div>
+						<input type="password" class="form-control" id="user_pw" placeholder="Password" name="user_pw" value=""/>
 					</div>
 					<div class="form-group">
 						<!-- オートログインのチェックボックス -->
-						<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">Remember me</label>
+						<input type="checkbox" id="Auto_Login_Check" name="Auto_Login_Check" /><label for="Auto_Login_Check">&nbsp;Remember me</label>
 					</div>
+					<br>
 					<div class="text-center">
 						<!-- ログインボタン -->
-						<input type="button" name="Login_Button" value="Sign in" onclick="Send_Function()" >
+						<input type="button" class="btn btn-default" name="Login_Button" value="Sign in" onclick="Send_Function()" >
 						<!-- リセットボタン -->
-						<input type="reset" name="Clear_Button" value="Reset"  />
+						<input type="reset" class="btn btn-default" name="Clear_Button" value="Reset"  />
 					</div>
 				</form>
 			</div>
+			<br>
 		</div>
-		<div class="col-lg-3"></div>
+		<div class="col-md-4"></div>
 	</div>
 </div>
 </body>

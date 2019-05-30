@@ -347,6 +347,22 @@
     <script src="../js/bootstrap-4.1.3-js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../js/Window_Common.js"></script>
 <title>メインメニュー画面</title>
+	<style>
+	<!--
+	body
+	{
+		padding-top: 70px;
+	}
+	.navbar-brand
+	{
+		font-size: 24px;
+	}
+	.form-group
+	{
+		margin-bottom: 5px;
+	}
+	-->
+	</style>
 </head>
 <body>
 	<script type="text/javascript">
@@ -406,27 +422,48 @@
 	}
 	</script>
 
-	<div class="parent">
-		<div class="inner">
-			<h3>メインメニュー画面</h3>
-			<br>
-			<p class="login_user">ようこそ、 <%= Login_User %> さん</p>
-			<br>
- 			<form name="File_Download_Form" method="post">
-				<input type="button" name="File_Down_btn" onclick="Send_File_Download()" value="ファイルダウンロード" />
-			</form>
-			<br>
-			<br>
-			<form name="Change_Password_Form" method="post">
-				<input type="button" name="Change_Password_btn" onclick="Send_Change_Password()" value="パスワード変更" />
-			</form>
-			<br>
-			<br>
-			<form name="Logout_Form" method="post">
-				<input type="button" name="Logout_btn" onclick="Send_Logout()" value="ログアウト" />
-			</form>
-			<br>
-			<br>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-4">
+				<div class="text-right"><p class="login_user">ようこそ、 <%= Login_User %> さん</p></div>
+			</div>
+			<div class="col-md-4"></div>
+		</div>
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-4 bg-info">
+				<br>
+				<div class="form-wrap">
+					<br>
+					<div class="form-group">
+						<form name="File_Download_Form" method="post">
+							<input type="button"	class="btn btn-default" name="File_Down_btn" onclick="Send_File_Download()" value="ファイルダウンロード" />
+						</form>
+					</div>
+					<br>
+					<div class="form-group">
+						<form name="Change_Password_Form" method="post">
+							<input type="button" class="btn btn-default" name="Change_Password_btn" onclick="Send_Change_Password()" value="パスワード変更" />
+						</form>
+					</div>
+					<br>
+					<br>
+				</div>
+			</div>
+			<div class="col-md-4"></div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-4"></div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<form name="Logout_Form" method="post">
+						<input type="button" class="btn btn-primary" name="Logout_btn" onclick="Send_Logout()" value="ログアウト" />
+					</form>
+				</div>
+			</div>
+			<div class="col-md-4"></div>
 		</div>
 	</div>
 </body>
